@@ -14,9 +14,9 @@ const firebaseConfig = {
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js';
 import { getDatabase, ref, onValue, set } from 'https://www.gstatic.com/firebasejs/9.17.1/firebase-database.js';
 
-const app = initializeApp(firebaseConfig);  // Initialize Firebase app with the config from index.html
-const database = getDatabase(app);  // Get the database reference
-const platformsRef = ref(database, 'platforms');  // Reference to 'platforms' node in the database
+const app = initializeApp(firebaseConfig);
+const database = getDatabase(app);
+const platformsRef = ref(database, 'platforms');
 
 // Function to create the platform table UI
 function createPlatformUI(platformData) {
@@ -26,7 +26,7 @@ function createPlatformUI(platformData) {
     // Iterate over platforms from 10 to 1 (reverse order)
     for (let i = 10; i >= 1; i--) {
         const row = document.createElement('tr');
-
+        
         // Platform number cell
         const platformCell = document.createElement('td');
         platformCell.textContent = `Platform ${i}`;
@@ -54,7 +54,7 @@ function createPlatformUI(platformData) {
                 checkbox.dataset.user = user;
 
                 // Always leave the checkboxes unchecked on page load
-                checkbox.checked = false;
+                checkbox.checked = platformData && platformData[i] && platformData[i][user] === choice;
 
                 const label = document.createElement('div');
                 label.classList.add('choice-label');
@@ -75,7 +75,7 @@ function createPlatformUI(platformData) {
     updateUIState();  // Call the updateUIState function to apply any state changes
 }
 
-// Fetch platform data from Firebase and update UI
+// Listen for platform data in real-time and update UI accordingly
 onValue(platformsRef, (snapshot) => {
     const platformData = snapshot.val();
     if (platformData) {
@@ -83,7 +83,7 @@ onValue(platformsRef, (snapshot) => {
     }
 });
 
-// Handle checkbox selection
+// Handle checkbox selection and update Firebase in real-time
 document.getElementById('platforms').addEventListener('change', (event) => {
     if (event.target.type === 'checkbox') {
         const checkbox = event.target;
@@ -127,10 +127,10 @@ function updateUIState() {
             }
         });
 
-        // Disable selected choices for other users
+        // Disable selected choices for other users (this applies to the current platform only)
         const allChoices = [];
         document.querySelectorAll('.choice-container').forEach(otherUserCell => {
-            if (otherUserCell !== userCell) {
+            if (otherUserCell !== userCell && otherUserCell.dataset.platform === platform) {
                 const otherUserCheckboxes = otherUserCell.querySelectorAll('input[type="checkbox"]');
                 otherUserCheckboxes.forEach(otherCheckbox => {
                     if (otherCheckbox.checked) {
