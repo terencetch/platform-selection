@@ -130,7 +130,7 @@ function updateUIState() {
         // Disable selected choices for other users
         const allChoices = [];
         document.querySelectorAll('.choice-container').forEach(otherUserCell => {
-            if (otherUserCell !== userCell) {
+            if (otherUserCell !== userCell && otherUserCell.dataset.platform === platform) {
                 const otherUserCheckboxes = otherUserCell.querySelectorAll('input[type="checkbox"]');
                 otherUserCheckboxes.forEach(otherCheckbox => {
                     if (otherCheckbox.checked) {
