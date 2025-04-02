@@ -1,105 +1,151 @@
-// Importing Firebase modules
-import { getDatabase, ref, onValue, set } from 'https://www.gstatic.com/firebasejs/9.17.1/firebase-database.js';
+// Reference to Firebase Database
+const database = firebase.database();
+const platformsRef = database.ref('platforms');
 
-// Initialize Firebase (Firebase app is already initialized in index.html)
-const database = getDatabase();
+// Function to create the platform table UI
+function createPlatformUI(platformData) {
+    const platformTableBody = document.getElementById('platforms');
+    platformTableBody.innerHTML = ''; // Clear existing table content
 
-// Define the Firebase Realtime Database reference for platforms
-const platformsRef = ref(getDatabase());
+    // Iterate over platforms from 10 to 1 (reverse order)
+    for (let i = 10; i >= 1; i--) {
+        if (!platformData[i]) continue; // Skip undefined platform entries
 
-// Disable other choices for the user (add a check to ensure the elements exist)
-function disableOtherChoicesForUser(platform, user, choice) {
-    const platformRow = document.querySelector(`#platform-${platform}`);
-    if (!platformRow) return;
+        const row = document.createElement('tr');
 
-    const checkboxes = platformRow.querySelectorAll(`input[type="checkbox"]`);
-    checkboxes.forEach((checkbox, index) => {
-        if (index + 1 !== choice) {
-            checkbox.disabled = true; // Disable other checkboxes except the one selected
+        // Platform number cell
+        const platformCell = document.createElement('td');
+        platformCell.textContent = `Platform ${i}`;
+        row.appendChild(platformCell);
+
+        // Iterate through users
+        ['Beleth', 'P0NY', 'UnsungHero', 'AhoyCaptain'].forEach(user => {
+            const userCell = document.createElement('td');
+            userCell.classList.add('choice-container');
+            userCell.dataset.user = user;
+            userCell.dataset.platform = i;
+
+            let userChoice = platformData[i][user] || null;
+
+            // Create checkboxes for choices (1 to 4)
+            for (let choice = 1; choice <= 4; choice++) {
+                const choiceWrapper = document.createElement('div');
+                choiceWrapper.classList.add('choice-wrapper');
+
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.value = choice;
+                checkbox.dataset.platform = i;
+                checkbox.dataset.user = user;
+
+                if (userChoice == choice) {
+                    checkbox.checked = true;
+                }
+
+                const label = document.createElement('div');
+                label.classList.add('choice-label');
+                label.textContent = choice;
+
+                choiceWrapper.appendChild(checkbox);
+                choiceWrapper.appendChild(label);
+                userCell.appendChild(choiceWrapper);
+            }
+
+            row.appendChild(userCell);
+        });
+
+        platformTableBody.appendChild(row);
+    }
+
+    updateUIState();
+}
+
+// Fetch platform data from Firebase and update UI
+platformsRef.on('value', (snapshot) => {
+    const platformData = snapshot.val();
+    if (platformData) {
+        createPlatformUI(platformData);
+    }
+});
+
+// Handle checkbox selection
+document.getElementById('platforms').addEventListener('change', (event) => {
+    if (event.target.type === 'checkbox') {
+        const checkbox = event.target;
+        const platformNumber = checkbox.dataset.platform;
+        const user = checkbox.dataset.user;
+        const choice = checkbox.value;
+
+        const userRef = platformsRef.child(platformNumber).child(user);
+
+        if (checkbox.checked) {
+            userRef.set(choice);
+        } else {
+            userRef.set(null);
+        }
+    }
+});
+
+// Function to update UI state (disabling checkboxes and setting green background)
+function updateUIState() {
+    document.querySelectorAll('.choice-container').forEach(userCell => {
+        const platform = userCell.dataset.platform;
+        const user = userCell.dataset.user;
+        const checkboxes = userCell.querySelectorAll('input[type="checkbox"]');
+
+        let selectedChoice = null;
+        checkboxes.forEach(checkbox => {
+            if (checkbox.checked) {
+                selectedChoice = checkbox.value;
+            }
+        });
+
+        checkboxes.forEach(checkbox => {
+            if (selectedChoice && checkbox.value !== selectedChoice) {
+                checkbox.disabled = true;
+            } else {
+                checkbox.disabled = false;
+            }
+        });
+
+        // Green background for last remaining choice
+        const uncheckedChoices = [...checkboxes].filter(checkbox => !checkbox.checked);
+        if (uncheckedChoices.length === 1) {
+            uncheckedChoices[0].parentElement.style.backgroundColor = 'green';
+        } else {
+            checkboxes.forEach(checkbox => {
+                checkbox.parentElement.style.backgroundColor = '';
+            });
         }
     });
 }
 
-// Function to create the platform UI dynamically
-function createPlatformUI(platformData) {
-    const platformTableBody = document.getElementById('platforms');
-    
-    // Loop through each platform (Platform 1 to Platform 10)
-    Object.keys(platformData).forEach(platform => {
-        const platformRow = document.createElement('tr');
-        platformRow.id = `platform-${platform}`;
+// Function to disable other choices for the user when one is selected
+function disableOtherChoicesForUser(platform, user, selectedChoice) {
+    const userCell = document.querySelector(`td[data-platform="${platform}"][data-user="${user}"]`);
+    if (!userCell) return;
 
-        // Platform number cell
-        const platformCell = document.createElement('td');
-        platformCell.textContent = `Platform ${platform}`;
-        platformRow.appendChild(platformCell);
-
-        // Create cells for each user
-        const users = ["Beleth", "P0NY", "UnsungHero", "AhoyCaptain"];
-        users.forEach(user => {
-            const userCell = document.createElement('td');
-            userCell.classList.add(user);
-
-            // Create choice options for each user
-            const choiceContainer = document.createElement('div');
-            choiceContainer.classList.add('choice-container');
-
-            for (let i = 1; i <= 4; i++) {
-                const checkboxWrapper = document.createElement('div');
-                
-                const checkbox = document.createElement('input');
-                checkbox.type = 'checkbox';
-                checkbox.id = `${user}-${platform}-${i}`;
-                checkbox.value = i;
-                
-                // Add a label for each checkbox
-                const label = document.createElement('label');
-                label.setAttribute('for', checkbox.id);
-                label.textContent = i;
-
-                checkboxWrapper.appendChild(checkbox);
-                checkboxWrapper.appendChild(label);
-                choiceContainer.appendChild(checkboxWrapper);
-
-                // If the user has selected this choice, disable others
-                if (platformData[platform] && platformData[platform][user] && platformData[platform][user] === i) {
-                    checkbox.checked = true;
-                    disableOtherChoicesForUser(platform, user, i);
-                }
-
-                // Handle checkbox change event
-                checkbox.addEventListener('change', function () {
-                    if (checkbox.checked) {
-                        disableOtherChoicesForUser(platform, user, i);
-                    } else {
-                        // Enable all checkboxes if none is selected
-                        enableAllChoicesForUser(platform);
-                    }
-                });
-            }
-
-            userCell.appendChild(choiceContainer);
-            platformRow.appendChild(userCell);
-        });
-
-        platformTableBody.appendChild(platformRow);
-    });
-}
-
-// Enable all choices for a user (to un-grey out options if the user unchecks their choice)
-function enableAllChoicesForUser(platform) {
-    const platformRow = document.querySelector(`#platform-${platform}`);
-    if (!platformRow) return;
-
-    const checkboxes = platformRow.querySelectorAll('input[type="checkbox"]');
+    const checkboxes = userCell.querySelectorAll('input[type="checkbox"]');
     checkboxes.forEach(checkbox => {
-        checkbox.disabled = false; // Enable all checkboxes
+        if (checkbox.value !== selectedChoice) {
+            checkbox.disabled = true;
+        }
     });
 }
 
+// Function to enable all choices when the user unchecks their selection
+function enableChoicesForUser(platform, user) {
+    const userCell = document.querySelector(`td[data-platform="${platform}"][data-user="${user}"]`);
+    if (!userCell) return;
 
-// Fetch data from Firebase and populate the table
-onValue(platformsRef, (snapshot) => {
+    const checkboxes = userCell.querySelectorAll('input[type="checkbox"]');
+    checkboxes.forEach(checkbox => {
+        checkbox.disabled = false;
+    });
+}
+
+// Listen for database updates and refresh UI
+platformsRef.on('value', snapshot => {
     const platformData = snapshot.val();
     if (platformData) {
         createPlatformUI(platformData);
