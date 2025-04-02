@@ -1,19 +1,12 @@
 // Initialize Firebase
-const firebaseConfig = {
-  apiKey: "AIzaSyCsuTYdBcFTGRYja0ONqRaW_es2eSCIeKA",
-  authDomain: "platform-selection.firebaseapp.com",
-  databaseURL: "https://platform-selection-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "platform-selection",
-  storageBucket: "platform-selection.firebasestorage.app",
-  messagingSenderId: "937466148910",
-  appId: "1:937466148910:web:42406630f4d64409e947bf",
-  measurementId: "G-LP3VWKX2F7"
-};
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js';
+import { getDatabase, ref, onValue, set } from 'https://www.gstatic.com/firebasejs/9.17.1/firebase-database.js';
 
-// Initialize Firebase
-firebase.initializeApp(firebaseConfig);
-const database = firebase.database();
-const platformsRef = database.ref("platforms");
+// Your Firebase config (it's already defined in index.html, so no need to redefine it here)
+const app = initializeApp(firebaseConfig);  // Initialize Firebase app with the config from index.html
+const database = getDatabase(app);  // Get the database reference
+
+const platformsRef = ref(database, 'platforms');
 
 // Function to create the platform table UI
 function createPlatformUI(platformData) {
@@ -74,7 +67,7 @@ function createPlatformUI(platformData) {
 }
 
 // Fetch platform data from Firebase and update UI
-platformsRef.on('value', (snapshot) => {
+onValue(platformsRef, (snapshot) => {
     const platformData = snapshot.val();
     if (platformData) {
         createPlatformUI(platformData);
@@ -89,12 +82,12 @@ document.getElementById('platforms').addEventListener('change', (event) => {
         const user = checkbox.dataset.user;
         const choice = checkbox.value;
 
-        const userRef = platformsRef.child(platformNumber).child(user);
+        const userRef = ref(database, 'platforms/' + platformNumber + '/' + user);
 
         if (checkbox.checked) {
-            userRef.set(choice);
+            set(userRef, choice);
         } else {
-            userRef.set(null);
+            set(userRef, null);
         }
     }
 });
@@ -158,7 +151,7 @@ function enableChoicesForUser(platform, user) {
 }
 
 // Listen for database updates and refresh UI
-platformsRef.on('value', snapshot => {
+onValue(platformsRef, snapshot => {
     const platformData = snapshot.val();
     if (platformData) {
         createPlatformUI(platformData);
