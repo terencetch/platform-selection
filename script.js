@@ -19,6 +19,9 @@ function createPlatformUI() {
             const cell = document.createElement("td");
             const choices = [1, 2, 3, 4];  // Choices for each platform
 
+            const choiceContainer = document.createElement("div");
+            choiceContainer.classList.add("choice-container");
+
             choices.forEach(choice => {
                 let label = document.createElement("label");
                 let checkbox = document.createElement("input");
@@ -34,9 +37,10 @@ function createPlatformUI() {
 
                 label.appendChild(checkbox);
                 label.appendChild(choiceLabel);
-                cell.appendChild(label);
+                choiceContainer.appendChild(label);
             });
 
+            cell.appendChild(choiceContainer);
             row.appendChild(cell);
         });
 
