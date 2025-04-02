@@ -35,26 +35,31 @@ function updateSelections(event) {
     let number = checkbox.dataset.number;
 
     if (checkbox.checked) {
+        // Store the selection and disable other users from selecting the same number
         selections[platform] = selections[platform] || {};
-        selections[platform][number] = true;
-        disableOtherSelections(platform, number);
+        selections[platform][number] = checkbox;
+
+        disableOtherUsers(platform, number, checkbox);
     } else {
+        // Remove the selection and re-enable checkboxes
         delete selections[platform][number];
-        enableSelections(platform);
+        enableOtherUsers(platform, number);
     }
 }
 
-function disableOtherSelections(platform, selectedNumber) {
+function disableOtherUsers(platform, selectedNumber, userCheckbox) {
     document.querySelectorAll(`input[data-platform='${platform}']`).forEach(checkbox => {
-        if (checkbox.dataset.number !== selectedNumber) {
-            checkbox.disabled = selections[platform][checkbox.dataset.number] ? true : Object.keys(selections[platform]).length >= 4;
+        if (checkbox !== userCheckbox && checkbox.dataset.number === selectedNumber) {
+            checkbox.disabled = true; // Disable for other users
         }
     });
 }
 
-function enableSelections(platform) {
+function enableOtherUsers(platform, selectedNumber) {
     document.querySelectorAll(`input[data-platform='${platform}']`).forEach(checkbox => {
-        checkbox.disabled = false;
+        if (!Object.keys(selections[platform] || {}).includes(selectedNumber)) {
+            checkbox.disabled = false; // Re-enable if no one has selected it
+        }
     });
 }
 
