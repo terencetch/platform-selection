@@ -25,8 +25,6 @@ function createPlatformUI(platformData) {
 
     // Iterate over platforms from 10 to 1 (reverse order)
     for (let i = 10; i >= 1; i--) {
-        if (!platformData[i]) continue; // Skip undefined platform entries
-
         const row = document.createElement('tr');
 
         // Platform number cell
@@ -41,12 +39,9 @@ function createPlatformUI(platformData) {
             userCell.dataset.user = user;
             userCell.dataset.platform = i;
 
-            let userChoice = platformData[i][user] || null;
+            let userChoice = platformData && platformData[i] && platformData[i][user] ? platformData[i][user] : null;
 
-            // Create checkboxes for choices (1 to 4) horizontally
-            const choicesWrapper = document.createElement('div');
-            choicesWrapper.classList.add('choices-wrapper');
-
+            // Create checkboxes for choices (1 to 4)
             for (let choice = 1; choice <= 4; choice++) {
                 const choiceWrapper = document.createElement('div');
                 choiceWrapper.classList.add('choice-wrapper');
@@ -57,11 +52,11 @@ function createPlatformUI(platformData) {
                 checkbox.dataset.platform = i;
                 checkbox.dataset.user = user;
 
-                // Make sure checkboxes are unchecked if no choice is made
+                // Ensure checkboxes are unchecked by default
                 if (userChoice == choice) {
                     checkbox.checked = true;
                 } else {
-                    checkbox.checked = false; // Uncheck by default
+                    checkbox.checked = false; // Explicitly uncheck on page load
                 }
 
                 const label = document.createElement('div');
@@ -70,10 +65,9 @@ function createPlatformUI(platformData) {
 
                 choiceWrapper.appendChild(checkbox);
                 choiceWrapper.appendChild(label);
-                choicesWrapper.appendChild(choiceWrapper);
+                userCell.appendChild(choiceWrapper);
             }
 
-            userCell.appendChild(choicesWrapper);
             row.appendChild(userCell);
         });
 
@@ -84,7 +78,7 @@ function createPlatformUI(platformData) {
 }
 
 // Fetch platform data from Firebase and update UI
-onValue(platformsRef, (snapshot) => {
+platformsRef.on('value', (snapshot) => {
     const platformData = snapshot.val();
     if (platformData) {
         createPlatformUI(platformData);
@@ -101,37 +95,15 @@ document.getElementById('platforms').addEventListener('change', (event) => {
 
         const userRef = ref(database, `platforms/${platformNumber}/${user}`);
 
-        // If the checkbox is checked, store the selected choice
         if (checkbox.checked) {
+            // If checked, set the choice in Firebase
             set(userRef, choice);
         } else {
-            // If the checkbox is unchecked, store null to indicate no selection
+            // If unchecked, set it to null in Firebase (i.e., no selection)
             set(userRef, null);
         }
-
-        // After updating Firebase, ensure that no platform entry is deleted if all are unchecked
-        ensurePlatformExists(platformNumber);
     }
 });
-
-// Function to ensure platform exists in the Firebase database even if all choices are null
-function ensurePlatformExists(platformNumber) {
-    const platformRef = ref(database, `platforms/${platformNumber}`);
-    
-    // Fetch current platform data
-    onValue(platformRef, (snapshot) => {
-        const platformData = snapshot.val();
-
-        // If the platform data is empty, we re-set the platform with empty user data
-        if (platformData) {
-            let hasUserChoices = Object.values(platformData).some(userData => userData !== null);
-            
-            if (!hasUserChoices) {
-                set(platformRef, { Beleth: null, P0NY: null, UnsungHero: null, AhoyCaptain: null });
-            }
-        }
-    });
-}
 
 // Function to update UI state (disabling checkboxes and setting green background)
 function updateUIState() {
