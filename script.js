@@ -96,10 +96,10 @@ function updateUIState(platformData) {
     const checkboxes = userCell.querySelectorAll('input[type="checkbox"]');
 
     checkboxes.forEach(checkbox => {
-        checkbox.disabled = false;
-        checkbox.checked = false;
-        checkbox.parentElement.style.backgroundColor = '';
-    })
+      checkbox.disabled = false;
+      checkbox.checked = false;
+      checkbox.parentElement.style.backgroundColor = '';
+    });
 
     const platformUsersData = platformData[platform] || {};
     Object.entries(platformUsersData).forEach(([otherUser, otherChoice]) => {
@@ -113,14 +113,24 @@ function updateUIState(platformData) {
     });
 
     Object.entries(platformUsersData).forEach(([dbUser, dbChoice]) => {
-        if(dbChoice){
-            checkboxes.forEach(checkbox => {
-                if(checkbox.value === dbChoice){
-                    checkbox.checked = true;
-                }
-            })
+      if (dbChoice) {
+        checkboxes.forEach(checkbox => {
+          if (checkbox.value === dbChoice) {
+            checkbox.checked = true;
+          }
+        });
+      }
+    });
+
+    // Disable other choices for the current user
+    const currentUserChoice = platformUsersData[user];
+    if (currentUserChoice) {
+      checkboxes.forEach(checkbox => {
+        if (checkbox.value !== currentUserChoice) {
+          checkbox.disabled = true;
         }
-    })
+      });
+    }
 
     const uncheckedChoices = Array.from(checkboxes).filter(checkbox => !checkbox.checked && !checkbox.disabled);
     if (uncheckedChoices.length === 1) {
