@@ -1,141 +1,116 @@
-const users = ["Beleth", "P0NY", "UnsungHero", "AhoyCaptain"];
-const platforms = 10;
-const selections = {};
+// Initialize Firebase
+const { initializeApp } = firebase;
+const { getDatabase, ref, set, get, child, onValue } = firebase.database;
 
-function createPlatformUI() {
-    const tbody = document.getElementById("platforms");
+// Firebase configuration object
+const firebaseConfig = {
+  apiKey: "AIzaSyCsuTYdBcFTGRYja0ONqRaW_es2eSCIeKA",
+  authDomain: "platform-selection.firebaseapp.com",
+  databaseURL: "https://platform-selection.firebaseio.com", // Correct public database URL
+  projectId: "platform-selection",
+  storageBucket: "platform-selection.firebasestorage.app",
+  messagingSenderId: "937466148910",
+  appId: "1:937466148910:web:42406630f4d64409e947bf",
+  measurementId: "G-LP3VWKX2F7"
+};
 
-    // Create rows starting from Platform 1 at the bottom and Platform 10 at the top
-    for (let i = platforms; i >= 1; i--) {
-        const row = document.createElement("tr");
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
 
-        // Platform Number Column
-        const platformCell = document.createElement("td");
+// Get a reference to the Firebase Realtime Database
+const database = getDatabase(app);
+
+// Variables for keeping track of platform data
+let platformData = {};
+
+// Function to load platform data from Firebase and render the table
+function loadPlatformData() {
+    const dbRef = ref(database, 'platforms/');
+    onValue(dbRef, (snapshot) => {
+        if (snapshot.exists()) {
+            platformData = snapshot.val();
+            renderPlatformTable();
+        } else {
+            console.log("No data available");
+        }
+    });
+}
+
+// Function to render the platform table based on current data
+function renderPlatformTable() {
+    const tableBody = document.getElementById('platforms-table-body');
+    tableBody.innerHTML = ''; // Clear the table
+
+    for (let i = 10; i >= 1; i--) { // Loop through platforms 10 to 1
+        const row = document.createElement('tr');
+        row.classList.add('platform-row');
+        const platformCell = document.createElement('td');
         platformCell.textContent = `Platform ${i}`;
         row.appendChild(platformCell);
 
-        // Create Selection Columns for each user (choices 1-4)
-        users.forEach(user => {
-            const cell = document.createElement("td");
-            const choices = [1, 2, 3, 4];  // Choices for each platform
+        ['Beleth', 'P0NY', 'UnsungHero', 'AhoyCaptain'].forEach(user => {
+            const userCell = document.createElement('td');
+            userCell.classList.add('user-cell');
 
-            const choiceContainer = document.createElement("div");
-            choiceContainer.classList.add("choice-container");
+            const choiceContainer = document.createElement('div');
+            const platformChoices = [1, 2, 3, 4];
 
-            choices.forEach(choice => {
-                let label = document.createElement("label");
-                let checkbox = document.createElement("input");
-                checkbox.type = "checkbox";
-                checkbox.dataset.platform = i;
-                checkbox.dataset.user = user;
-                checkbox.dataset.choice = choice;
-                checkbox.addEventListener("change", updateSelections);
+            platformChoices.forEach(choice => {
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.value = choice;
+                checkbox.disabled = platformData[`platform${i}`]?.[user]; // Disable if the user already made a choice
 
-                let choiceLabel = document.createElement("span");
-                choiceLabel.classList.add("choice-label");
+                // If the user has selected a choice, mark it checked
+                if (platformData[`platform${i}`]?.[user] === choice) {
+                    checkbox.checked = true;
+                }
+
+                // Handle user selection and unchecking
+                checkbox.addEventListener('change', function() {
+                    handleChoiceChange(i, user, choice, checkbox);
+                });
+
+                const choiceLabel = document.createElement('span');
                 choiceLabel.textContent = choice;
 
-                label.appendChild(checkbox);
-                label.appendChild(choiceLabel);
-                choiceContainer.appendChild(label);
+                // Add choice to container
+                choiceContainer.appendChild(checkbox);
+                choiceContainer.appendChild(choiceLabel);
             });
 
-            cell.appendChild(choiceContainer);
-            row.appendChild(cell);
+            // Add the choice container to the user's cell
+            userCell.appendChild(choiceContainer);
+            row.appendChild(userCell);
         });
 
-        tbody.appendChild(row);
+        tableBody.appendChild(row);
     }
 }
 
-function updateSelections(event) {
-    let checkbox = event.target;
-    let platform = checkbox.dataset.platform;
-    let choice = checkbox.dataset.choice;
-    let user = checkbox.dataset.user;
+// Function to handle the change of a user's choice
+function handleChoiceChange(platformNumber, user, choice, checkbox) {
+    const platformRef = ref(database, `platforms/platform${platformNumber}`);
+    const updates = {};
 
-    // If the checkbox is checked, store the selection, and disable others for that platform
+    // If the checkbox is checked, set the choice
     if (checkbox.checked) {
-        selections[platform] = selections[platform] || {};
-
-        // Uncheck the previously selected choice for this user (if any)
-        if (selections[platform][user]) {
-            const prevChoice = selections[platform][user];
-            const prevCheckbox = document.querySelector(`input[data-platform='${platform}'][data-user='${user}'][data-choice='${prevChoice}']`);
-            if (prevCheckbox) {
-                prevCheckbox.checked = false; // Uncheck the previous selection
-            }
-        }
-
-        selections[platform][choice] = user; // Store new selection
-
-        // Disable other choices for the user
-        disableOtherChoicesForUser(platform, user, choice);
-        // Disable other users from selecting this choice
-        disableOtherUsers(platform, choice, user);
-        checkLastChoice(platform);
+        updates[user] = choice;
     } else {
-        // If unchecked, remove the selection and re-enable the choices
-        delete selections[platform][choice];
-        enableOtherUsers(platform, choice);
-        enableOtherChoicesForUser(platform, user);
-        checkLastChoice(platform);
+        updates[user] = null;
     }
+
+    // Write the updates to the database
+    set(platformRef, updates);
 }
 
-function disableOtherChoicesForUser(platform, user, selectedChoice) {
-    document.querySelectorAll(`input[data-platform='${platform}'][data-user='${user}']`).forEach(checkbox => {
-        if (checkbox.dataset.choice !== selectedChoice) {
-            checkbox.disabled = true; // Disable other choices for this user
-        }
-    });
+// Function to initialize the app (called when the page loads)
+function initializeApp() {
+    loadPlatformData(); // Load and display platform data when the page is loaded
 }
 
-function enableOtherChoicesForUser(platform, user) {
-    document.querySelectorAll(`input[data-platform='${platform}'][data-user='${user}']`).forEach(checkbox => {
-        checkbox.disabled = false; // Re-enable all choices for this user
-    });
-}
+// Call the initialization function when the page loads
+document.addEventListener("DOMContentLoaded", initializeApp);
 
-function disableOtherUsers(platform, selectedChoice, selectedUser) {
-    document.querySelectorAll(`input[data-platform='${platform}']`).forEach(checkbox => {
-        if (checkbox.dataset.choice === selectedChoice && checkbox.dataset.user !== selectedUser) {
-            checkbox.disabled = true; // Disable for other users
-        }
-    });
-}
-
-function enableOtherUsers(platform, selectedChoice) {
-    document.querySelectorAll(`input[data-platform='${platform}']`).forEach(checkbox => {
-        if (!Object.values(selections[platform]).includes(selectedChoice)) {
-            checkbox.disabled = false; // Re-enable the choice if not selected
-        }
-    });
-}
-
-function checkLastChoice(platform) {
-    const choices = [1, 2, 3, 4];
-    const selectedChoices = Object.keys(selections[platform] || {}).map(choice => parseInt(choice));
-    const remainingChoices = choices.filter(choice => !selectedChoices.includes(choice));
-
-    // Identify users who haven't selected a choice for this platform
-    let usersWithNoSelection = users.filter(user => !Object.keys(selections[platform] || {}).some(choice => selections[platform][choice] === user));
-
-    // Only apply green background to the last user who hasn't selected a choice
-    usersWithNoSelection.forEach(user => {
-        const remainingChoicesForUser = remainingChoices.length === 1 ? remainingChoices : [];
-
-        document.querySelectorAll(`input[data-platform='${platform}'][data-user='${user}']`).forEach(checkbox => {
-            const isLastChoice = remainingChoicesForUser.length === 1 && parseInt(checkbox.dataset.choice) === remainingChoicesForUser[0];
-
-            // Apply green background only for the last user with remaining choices
-            if (isLastChoice) {
-                checkbox.parentElement.classList.add("selected-last");
-            } else {
-                checkbox.parentElement.classList.remove("selected-last");
-            }
-        });
-    });
-}
 
 document.addEventListener("DOMContentLoaded", createPlatformUI);
