@@ -1,0 +1,11 @@
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+}
+
+.platform {
+    margin: 10px;
+    padding: 10px;
+    border: 1px solid black;
+    display: inline-block;
+}
