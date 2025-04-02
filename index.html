@@ -3,12 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Platform Selection</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Real-Time Platform Selection</title>
+
+    <!-- Add Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js"></script>
+
+    <style>
+        /* Style as required (adjust this for your page) */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        td {
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+        .choice-container {
+            display: flex;
+            justify-content: space-around;
+        }
+        .choice-container input {
+            margin: 5px;
+        }
+        .choice-container label {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .selected-last {
+            background-color: green;
+            color: white;
+        }
+    </style>
 </head>
 <body>
     <h1>Platform Selection</h1>
-    <table id="platform-table">
+    <table>
         <thead>
             <tr>
                 <th>Platform</th>
@@ -20,6 +52,7 @@
         </thead>
         <tbody id="platforms"></tbody>
     </table>
+
     <script src="script.js"></script>
 </body>
 </html>
