@@ -1,22 +1,7 @@
-// Firebase config (copy the values directly from index.html)
-const firebaseConfig = {
-  apiKey: "AIzaSyCsuTYdBcFTGRYja0ONqRaW_es2eSCIeKA",
-  authDomain: "platform-selection.firebaseapp.com",
-  databaseURL: "https://platform-selection-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "platform-selection",
-  storageBucket: "platform-selection.firebasestorage.app",
-  messagingSenderId: "937466148910",
-  appId: "1:937466148910:web:42406630f4d64409e947bf",
-  measurementId: "G-LP3VWKX2F7"
-};
-
 // Initialize Firebase
-import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js';
-import { getDatabase, ref, onValue, set } from 'https://www.gstatic.com/firebasejs/9.17.1/firebase-database.js';
-
-const app = initializeApp(firebaseConfig);  // Initialize Firebase app with the config from index.html
-const database = getDatabase(app);  // Get the database reference
-const platformsRef = ref(database, 'platforms');  // Reference to 'platforms' node in the database
+firebase.initializeApp(firebaseConfig);
+const database = firebase.database();
+const platformsRef = database.ref("platforms");
 
 // Function to create the platform table UI
 function createPlatformUI(platformData) {
@@ -57,7 +42,7 @@ function createPlatformUI(platformData) {
                 if (userChoice == choice) {
                     checkbox.checked = true;
                 } else {
-                    checkbox.checked = false; // Ensure the box is unchecked initially
+                    checkbox.checked = false; // Make sure it is unchecked initially
                 }
 
                 const label = document.createElement('div');
@@ -78,8 +63,8 @@ function createPlatformUI(platformData) {
     updateUIState();
 }
 
-// Fetch platform data from Firebase and update UI (using Modular SDK's onValue method)
-onValue(platformsRef, (snapshot) => {
+// Fetch platform data from Firebase and update UI
+platformsRef.on('value', (snapshot) => {
     const platformData = snapshot.val();
     if (platformData) {
         createPlatformUI(platformData);
@@ -94,12 +79,12 @@ document.getElementById('platforms').addEventListener('change', (event) => {
         const user = checkbox.dataset.user;
         const choice = checkbox.value;
 
-        const userRef = ref(database, `platforms/${platformNumber}/${user}`);
+        const userRef = platformsRef.child(platformNumber).child(user);
 
         if (checkbox.checked) {
-            set(userRef, choice); // Update the Firebase database with the selected choice
+            userRef.set(choice);  // Save the selected choice
         } else {
-            set(userRef, null);  // Uncheck and update the database to null
+            userRef.set(null);  // Remove the selected choice
         }
     }
 });
@@ -161,3 +146,11 @@ function enableChoicesForUser(platform, user) {
         checkbox.disabled = false;
     });
 }
+
+// Listen for database updates and refresh UI
+platformsRef.on('value', snapshot => {
+    const platformData = snapshot.val();
+    if (platformData) {
+        createPlatformUI(platformData);
+    }
+});
