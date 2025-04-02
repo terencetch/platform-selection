@@ -12,7 +12,7 @@ const firebaseConfig = {
 
 // Initialize Firebase
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js';
-import { getDatabase, ref, onValue, set, get } from 'https://www.gstatic.com/firebasejs/9.17.1/firebase-database.js';
+import { getDatabase, ref, onValue, set } from 'https://www.gstatic.com/firebasejs/9.17.1/firebase-database.js';
 
 const app = initializeApp(firebaseConfig);  // Initialize Firebase app with the config from index.html
 const database = getDatabase(app);  // Get the database reference
@@ -40,6 +40,9 @@ function createPlatformUI(platformData) {
             userCell.dataset.platform = i;
 
             // Create checkboxes for choices (1 to 4) horizontally
+            const choiceWrapperContainer = document.createElement('div');
+            choiceWrapperContainer.classList.add('choice-wrapper-container');
+            
             for (let choice = 1; choice <= 4; choice++) {
                 const choiceWrapper = document.createElement('div');
                 choiceWrapper.classList.add('choice-wrapper');
@@ -59,9 +62,10 @@ function createPlatformUI(platformData) {
 
                 choiceWrapper.appendChild(checkbox);
                 choiceWrapper.appendChild(label);
-                userCell.appendChild(choiceWrapper);
+                choiceWrapperContainer.appendChild(choiceWrapper);
             }
 
+            userCell.appendChild(choiceWrapperContainer);
             row.appendChild(userCell);
         });
 
@@ -94,6 +98,8 @@ document.getElementById('platforms').addEventListener('change', (event) => {
         } else {
             set(userRef, null); // If unchecked, remove the choice from Firebase
         }
+
+        updateUIState(); // Update UI state after the change
     }
 });
 
@@ -122,12 +128,15 @@ function updateUIState() {
 
         // Disable selected choices for other users
         const allChoices = [];
-        document.querySelectorAll('.choice-container[data-platform="' + platform + '"]').forEach(cell => {
-            cell.querySelectorAll('input[type="checkbox"]').forEach(cb => {
-                if (cb.checked) {
-                    allChoices.push(cb.value);
-                }
-            });
+        document.querySelectorAll('.choice-container').forEach(otherUserCell => {
+            if (otherUserCell !== userCell) {
+                const otherUserCheckboxes = otherUserCell.querySelectorAll('input[type="checkbox"]');
+                otherUserCheckboxes.forEach(otherCheckbox => {
+                    if (otherCheckbox.checked) {
+                        allChoices.push(otherCheckbox.value);
+                    }
+                });
+            }
         });
 
         checkboxes.forEach(checkbox => {
@@ -135,15 +144,5 @@ function updateUIState() {
                 checkbox.disabled = true;
             }
         });
-
-        // Green background for last remaining choice
-        const uncheckedChoices = [...checkboxes].filter(checkbox => !checkbox.checked);
-        if (uncheckedChoices.length === 1) {
-            uncheckedChoices[0].parentElement.style.backgroundColor = 'green';
-        } else {
-            checkboxes.forEach(checkbox => {
-                checkbox.parentElement.style.backgroundColor = '';
-            });
-        }
     });
 }
