@@ -20,139 +20,123 @@ const platformsRef = ref(database, 'platforms');
 
 // Function to create the platform table UI
 function createPlatformUI(platformData) {
-    const platformTableBody = document.getElementById('platforms');
-    platformTableBody.innerHTML = ''; // Clear existing table content
+  const platformTableBody = document.getElementById('platforms');
+  platformTableBody.innerHTML = ''; // Clear existing table content
 
-    // Iterate over platforms from 10 to 1 (reverse order)
-    for (let i = 10; i >= 1; i--) {
-        const row = document.createElement('tr');
-        
-        // Platform number cell
-        const platformCell = document.createElement('td');
-        platformCell.textContent = `Platform ${i}`;
-        row.appendChild(platformCell);
+  // Iterate over platforms from 10 to 1 (reverse order)
+  for (let i = 10; i >= 1; i--) {
+    const row = document.createElement('tr');
 
-        // Iterate through users
-        ['Beleth', 'P0NY', 'UnsungHero', 'AhoyCaptain'].forEach(user => {
-            const userCell = document.createElement('td');
-            userCell.classList.add('choice-container');
-            userCell.dataset.user = user;
-            userCell.dataset.platform = i;
+    // Platform number cell
+    const platformCell = document.createElement('td');
+    platformCell.textContent = `Platform ${i}`;
+    row.appendChild(platformCell);
 
-            // Create checkboxes for choices (1 to 4) horizontally
-            const choiceWrapperContainer = document.createElement('div');
-            choiceWrapperContainer.classList.add('choice-wrapper-container');
-            
-            for (let choice = 1; choice <= 4; choice++) {
-                const choiceWrapper = document.createElement('div');
-                choiceWrapper.classList.add('choice-wrapper');
+    // Iterate through users
+    ['Beleth', 'P0NY', 'UnsungHero', 'AhoyCaptain'].forEach(user => {
+      const userCell = document.createElement('td');
+      userCell.classList.add('choice-container');
+      userCell.dataset.user = user;
+      userCell.dataset.platform = i;
 
-                const checkbox = document.createElement('input');
-                checkbox.type = 'checkbox';
-                checkbox.value = choice;
-                checkbox.dataset.platform = i;
-                checkbox.dataset.user = user;
+      // Create checkboxes for choices (1 to 4) horizontally
+      const choiceWrapperContainer = document.createElement('div');
+      choiceWrapperContainer.classList.add('choice-wrapper-container');
 
-                // Initially unchecked on page load
-                checkbox.checked = false;
+      for (let choice = 1; choice <= 4; choice++) {
+        const choiceWrapper = document.createElement('div');
+        choiceWrapper.classList.add('choice-wrapper');
 
-                const label = document.createElement('div');
-                label.classList.add('choice-label');
-                label.textContent = choice;
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.value = choice;
+        checkbox.dataset.platform = i;
+        checkbox.dataset.user = user;
 
-                choiceWrapper.appendChild(checkbox);
-                choiceWrapper.appendChild(label);
-                choiceWrapperContainer.appendChild(choiceWrapper);
-            }
+        // Initially unchecked on page load
+        checkbox.checked = false;
 
-            userCell.appendChild(choiceWrapperContainer);
-            row.appendChild(userCell);
-        });
+        const label = document.createElement('div');
+        label.classList.add('choice-label');
+        label.textContent = choice;
 
-        platformTableBody.appendChild(row);
-    }
+        choiceWrapper.appendChild(checkbox);
+        choiceWrapper.appendChild(label);
+        choiceWrapperContainer.appendChild(choiceWrapper);
+      }
 
-    updateUIState();  // Call the updateUIState function to apply any state changes
+      userCell.appendChild(choiceWrapperContainer);
+      row.appendChild(userCell);
+    });
+
+    platformTableBody.appendChild(row);
+  }
+
+  updateUIState(platformData || {}); // Call the updateUIState function to apply any state changes
 }
 
 // Listen for platform data in real-time and update UI accordingly
 onValue(platformsRef, (snapshot) => {
-    const platformData = snapshot.val();
-    if (platformData) {
-        createPlatformUI(platformData); // Render UI based on Firebase data
-    }
+  const platformData = snapshot.val();
+  createPlatformUI(platformData); // Render UI based on Firebase data
 });
 
 // Handle checkbox selection and update Firebase in real-time
 document.getElementById('platforms').addEventListener('change', (event) => {
-    if (event.target.type === 'checkbox') {
-        const checkbox = event.target;
-        const platformNumber = checkbox.dataset.platform;
-        const user = checkbox.dataset.user;
-        const choice = checkbox.value;
+  if (event.target.type === 'checkbox') {
+    const checkbox = event.target;
+    const platformNumber = checkbox.dataset.platform;
+    const user = checkbox.dataset.user;
+    const choice = checkbox.value;
 
-        const userRef = ref(database, `platforms/${platformNumber}/${user}`);
+    const userRef = ref(database, `platforms/${platformNumber}/${user}`);
 
-        // Update Firebase based on checkbox state
-        if (checkbox.checked) {
-            set(userRef, choice); // Save the selected choice to Firebase
-        } else {
-            set(userRef, null); // If unchecked, remove the choice from Firebase
-        }
-    }
+    // Update Firebase based on checkbox state
+    set(userRef, checkbox.checked ? choice : null);
+  }
 });
 
 // Function to update UI state (disabling checkboxes and setting green background)
-function updateUIState() {
-    // Apply logic for each platform independently
-    document.querySelectorAll('.choice-container').forEach(userCell => {
-        const platform = userCell.dataset.platform;
-        const user = userCell.dataset.user;
-        const checkboxes = userCell.querySelectorAll('input[type="checkbox"]');
+function updateUIState(platformData) {
+  document.querySelectorAll('.choice-container').forEach(userCell => {
+    const platform = userCell.dataset.platform;
+    const user = userCell.dataset.user;
+    const checkboxes = userCell.querySelectorAll('input[type="checkbox"]');
 
-        let selectedChoice = null;
-        checkboxes.forEach(checkbox => {
-            if (checkbox.checked) {
-                selectedChoice = checkbox.value;
-            }
-        });
-
-        // Disable other choices for the current user when one is selected
-        checkboxes.forEach(checkbox => {
-            if (selectedChoice && checkbox.value !== selectedChoice) {
-                checkbox.disabled = true;
-            } else {
-                checkbox.disabled = false;
-            }
-        });
-
-        // Disable selected choices for other users on the same platform
-        const allChoices = [];
-        document.querySelectorAll('.choice-container').forEach(otherUserCell => {
-            if (otherUserCell !== userCell && otherUserCell.dataset.platform === platform) {
-                const otherUserCheckboxes = otherUserCell.querySelectorAll('input[type="checkbox"]');
-                otherUserCheckboxes.forEach(otherCheckbox => {
-                    if (otherCheckbox.checked) {
-                        allChoices.push(otherCheckbox.value);
-                    }
-                });
-            }
-        });
-
-        checkboxes.forEach(checkbox => {
-            if (allChoices.includes(checkbox.value)) {
-                checkbox.disabled = true;
-            }
-        });
-
-        // Green background for the last remaining choice (last user who selects)
-        const uncheckedChoices = [...checkboxes].filter(checkbox => !checkbox.checked);
-        if (uncheckedChoices.length === 1) {
-            uncheckedChoices[0].parentElement.style.backgroundColor = 'green';
-        } else {
-            checkboxes.forEach(checkbox => {
-                checkbox.parentElement.style.backgroundColor = '';  // Reset background
-            });
-        }
+    let selectedChoice = null;
+    checkboxes.forEach(checkbox => {
+      if (checkbox.checked) {
+        selectedChoice = checkbox.value;
+      }
     });
+
+    // Disable other choices for the current user when one is selected
+    checkboxes.forEach(checkbox => {
+      checkbox.disabled = selectedChoice && checkbox.value !== selectedChoice;
+    });
+
+    // Disable selected choices for other users on the same platform
+    const platformUsersData = platformData[platform];
+    if (platformUsersData) {
+      Object.entries(platformUsersData).forEach(([otherUser, otherChoice]) => {
+        if (otherUser !== user && otherChoice) {
+          checkboxes.forEach(checkbox => {
+            if (checkbox.value === otherChoice) {
+              checkbox.disabled = true;
+            }
+          });
+        }
+      });
+    }
+
+    // Green background for the last remaining choice (last user who selects)
+    const uncheckedChoices = Array.from(checkboxes).filter(checkbox => !checkbox.checked && !checkbox.disabled);
+    if (uncheckedChoices.length === 1) {
+      uncheckedChoices[0].parentElement.style.backgroundColor = 'green';
+    } else {
+      checkboxes.forEach(checkbox => {
+        checkbox.parentElement.style.backgroundColor = ''; // Reset background
+      });
+    }
+  });
 }
