@@ -111,6 +111,3 @@ function initializeApp() {
 
 // Call the initialization function when the page loads
 document.addEventListener("DOMContentLoaded", initializeApp);
-
-
-document.addEventListener("DOMContentLoaded", createPlatformUI);
