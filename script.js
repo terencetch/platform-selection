@@ -1,4 +1,4 @@
-// Firebase config
+// Firebase config (same as before)
 const firebaseConfig = {
   apiKey: "AIzaSyCsuTYdBcFTGRYja0ONqRaW_es2eSCIeKA",
   authDomain: "platform-selection.firebaseapp.com",
@@ -10,7 +10,7 @@ const firebaseConfig = {
   measurementId: "G-LP3VWKX2F7"
 };
 
-// Initialize Firebase
+// Initialize Firebase (same as before)
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js';
 import { getDatabase, ref, onValue, set } from 'https://www.gstatic.com/firebasejs/9.17.1/firebase-database.js';
 
@@ -18,7 +18,7 @@ const app = initializeApp(firebaseConfig);
 const database = getDatabase(app);
 const platformsRef = ref(database, 'platforms');
 
-// Function to create the platform table UI
+// Function to create the platform table UI (same as before)
 function createPlatformUI() {
   const platformTableBody = document.getElementById('platforms');
   platformTableBody.innerHTML = '';
@@ -64,18 +64,18 @@ function createPlatformUI() {
   }
 }
 
-// Function to clear Firebase data
+// Function to clear Firebase data (same as before)
 function clearFirebaseData() {
   set(platformsRef, null);
 }
 
-// Listen for platform data in real-time and update UI accordingly
+// Listen for platform data in real-time and update UI accordingly (same as before)
 onValue(platformsRef, (snapshot) => {
   const platformData = snapshot.val() || {};
   updateUIState(platformData);
 });
 
-// Handle checkbox selection and update Firebase in real-time
+// Handle checkbox selection and update Firebase in real-time (same as before)
 document.getElementById('platforms').addEventListener('change', (event) => {
   if (event.target.type === 'checkbox') {
     const checkbox = event.target;
@@ -88,7 +88,7 @@ document.getElementById('platforms').addEventListener('change', (event) => {
   }
 });
 
-// Function to update UI state (disabling checkboxes and setting green background)
+// Function to update UI state (disabling checkboxes, setting green background, and updating checked state)
 function updateUIState(platformData) {
   document.querySelectorAll('.choice-container').forEach(userCell => {
     const platform = userCell.dataset.platform;
@@ -108,12 +108,17 @@ function updateUIState(platformData) {
 
     const platformUsersData = platformData[platform] || {};
     Object.entries(platformUsersData).forEach(([otherUser, otherChoice]) => {
-      if (otherUser !== user && otherChoice) {
+      if (otherUser !== user) {
         checkboxes.forEach(checkbox => {
-          if (checkbox.value === otherChoice) {
+          checkbox.checked = checkbox.value === otherChoice;
+          if (checkbox.checked) {
             checkbox.disabled = true;
           }
         });
+      } else {
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = checkbox.value === platformUsersData[user]
+        })
       }
     });
 
@@ -128,6 +133,6 @@ function updateUIState(platformData) {
   });
 }
 
-// Clear Firebase data and create initial UI
+// Clear Firebase data and create initial UI (same as before)
 clearFirebaseData();
 createPlatformUI();
