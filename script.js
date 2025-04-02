@@ -1,28 +1,31 @@
 const users = ["Beleth", "P0NY", "UnsungHero", "AhoyCaptain"];
 const platforms = 10;
-const selections = {}; 
+const selections = {};
 
 function createPlatformUI() {
-    const container = document.getElementById("platforms");
-    
+    const tbody = document.getElementById("platforms");
+
     for (let i = 1; i <= platforms; i++) {
-        const div = document.createElement("div");
-        div.classList.add("platform");
-        div.innerHTML = `<h3>Platform ${i}</h3>`;
-        
+        const row = document.createElement("tr");
+
+        // Platform Number Column
+        const platformCell = document.createElement("td");
+        platformCell.textContent = `Platform ${i}`;
+        row.appendChild(platformCell);
+
+        // Selection Columns (1-4)
         for (let n = 1; n <= 4; n++) {
-            let label = document.createElement("label");
+            const cell = document.createElement("td");
             let checkbox = document.createElement("input");
             checkbox.type = "checkbox";
             checkbox.dataset.platform = i;
             checkbox.dataset.number = n;
             checkbox.addEventListener("change", updateSelections);
-            
-            label.appendChild(checkbox);
-            label.appendChild(document.createTextNode(` ${n} `));
-            div.appendChild(label);
+            cell.appendChild(checkbox);
+            row.appendChild(cell);
         }
-        container.appendChild(div);
+
+        tbody.appendChild(row);
     }
 }
 
@@ -30,7 +33,7 @@ function updateSelections(event) {
     let checkbox = event.target;
     let platform = checkbox.dataset.platform;
     let number = checkbox.dataset.number;
-    
+
     if (checkbox.checked) {
         selections[platform] = selections[platform] || {};
         selections[platform][number] = true;
