@@ -14,12 +14,13 @@ function createPlatformUI(platformData) {
     // Clear existing rows before rendering new data
     tableBody.innerHTML = '';
 
-    // Reverse the platformData so Platform 10 appears at the top and Platform 1 at the bottom
-    platformData.reverse(); 
+    // Convert the platformData object to an array and reverse it
+    const platformArray = Object.values(platformData); // Convert to an array
+    platformArray.reverse(); // Now we can reverse the array
 
     // Loop through each platform and create a row in the table
-    for (let platformId = 0; platformId < platformData.length; platformId++) {
-        const platform = platformData[platformId];
+    for (let platformId = 0; platformId < platformArray.length; platformId++) {
+        const platform = platformArray[platformId];
         const row = document.createElement('tr');
 
         // Platform number column
