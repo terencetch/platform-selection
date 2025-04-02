@@ -1,88 +1,84 @@
 // Initialize Firebase
 const firebaseConfig = {
-  apiKey: "AIzaSyCsuTYdBcFTGRYja0ONqRaW_es2eSCIeKA",
-  authDomain: "platform-selection.firebaseapp.com",
-  databaseURL: "https://platform-selection.firebaseio.com", // Correct public database URL
-  projectId: "platform-selection",
-  storageBucket: "platform-selection.firebasestorage.app",
-  messagingSenderId: "937466148910",
-  appId: "1:937466148910:web:42406630f4d64409e947bf",
-  measurementId: "G-LP3VWKX2F7"
+    apiKey: "YOUR_API_KEY",  // Replace with your actual API Key
+    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",  // Replace with your project ID
+    databaseURL: "https://YOUR_PROJECT_ID.firebaseio.com",  // Replace with your database URL
+    projectId: "YOUR_PROJECT_ID",  // Replace with your project ID
+    storageBucket: "YOUR_PROJECT_ID.appspot.com",  // Replace with your storage bucket
+    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",  // Replace with your messaging sender ID
+    appId: "YOUR_APP_ID"  // Replace with your app ID
 };
 
-// Initialize Firebase app and database
-const app = firebase.initializeApp(firebaseConfig);
-const database = firebase.database(app);
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+const platformsRef = db.ref("platforms");
 
-// Set up the platform data
-let platformData = {};
+// Fetch data from Firebase and render the table
+platformsRef.once("value", function(snapshot) {
+    const platforms = snapshot.val();
+    createPlatformUI(platforms);
+});
 
-// Load platform data from Firebase and render it
-function loadPlatformData() {
-    const dbRef = firebase.database().ref('platforms/');
-    dbRef.on('value', (snapshot) => {
-        if (snapshot.exists()) {
-            platformData = snapshot.val();
-            renderPlatformTable();
-        } else {
-            console.log("No data available");
-        }
-    });
-}
+// Create platform UI based on Firebase data
+function createPlatformUI(platforms) {
+    const table = document.getElementById("platform-table");
+    table.innerHTML = ""; // Clear the table before rendering
 
-// Render the platform selection table
-function renderPlatformTable() {
-    const tableBody = document.getElementById('platforms-table-body');
-    tableBody.innerHTML = ''; // Clear the table
-
-    // Loop through platforms and display them
     for (let i = 10; i >= 1; i--) {
-        const row = document.createElement('tr');
-        row.classList.add('platform-row');
-        
-        const platformCell = document.createElement('td');
+        const platform = platforms[`platform${i}`];
+
+        if (!platform) continue; // Skip empty platforms
+
+        const row = document.createElement("tr");
+        const platformCell = document.createElement("td");
         platformCell.textContent = `Platform ${i}`;
         row.appendChild(platformCell);
 
-        const users = ['Beleth', 'P0NY', 'UnsungHero', 'AhoyCaptain'];
-
+        // Create user columns for each platform
+        const users = ["Beleth", "P0NY", "UnsungHero", "AhoyCaptain"];
         users.forEach(user => {
-            const userCell = document.createElement('td');
-            userCell.classList.add('user-cell');
+            const userCell = document.createElement("td");
+            userCell.classList.add("checkbox-container");
 
-            const checkboxContainer = document.createElement('div');
-            const checkboxes = [1, 2, 3, 4];
-
-            checkboxes.forEach((choice) => {
-                const checkbox = document.createElement('input');
+            // Create checkboxes for each user
+            for (let choice = 1; choice <= 4; choice++) {
+                const checkbox = document.createElement("input");
                 checkbox.type = "checkbox";
-                checkbox.name = `${user}-platform-${i}`;
                 checkbox.value = choice;
+                checkbox.disabled = platform[user] && platform[user] !== choice;
 
-                // Disable checkboxes that are already selected by others
-                if (platformData[`platform${i}`] && Object.values(platformData[`platform${i}`]).includes(choice) && platformData[`platform${i}`][user] !== choice) {
-                    checkbox.disabled = true;
+                // If this is the user's selection, check the box
+                if (platform[user] === choice) {
+                    checkbox.checked = true;
                 }
 
-                // If it's the last user and no choice is selected, make the last choice green
-                if (user === 'AhoyCaptain' && Object.values(platformData[`platform${i}`]).length === 3 && !checkbox.checked) {
-                    checkbox.style.backgroundColor = 'green';
-                }
+                // Add event listener to handle checkbox clicks
+                checkbox.addEventListener("change", function() {
+                    handleChoiceChange(i, user, choice, checkbox.checked);
+                });
 
-                // Add checkbox to the container
-                checkboxContainer.appendChild(checkbox);
-            });
+                const label = document.createElement("label");
+                label.textContent = choice;
 
-            userCell.appendChild(checkboxContainer);
+                userCell.appendChild(checkbox);
+                userCell.appendChild(label);
+            }
+
             row.appendChild(userCell);
         });
 
-        tableBody.appendChild(row);
+        table.appendChild(row);
     }
 }
 
-// Initialize and load data on page load
-window.onload = function () {
-    loadPlatformData();
-};
+// Handle choice changes in the table
+function handleChoiceChange(platformNum, user, choice, checked) {
+    const platformRef = db.ref(`platforms/platform${platformNum}/${user}`);
 
+    if (checked) {
+        platformRef.set(choice);
+    } else {
+        platformRef.remove();
+    }
+}
