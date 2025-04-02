@@ -1,62 +1,64 @@
-/* Basic styling for the table */
-table {
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f9;
+    padding: 20px;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+#platforms-table {
     width: 100%;
     border-collapse: collapse;
-    margin: 20px 0;
 }
 
-th, td {
-    border: 1px solid #ddd;
-    padding: 10px;
+#platforms-table th,
+#platforms-table td {
+    padding: 15px;
     text-align: center;
+    border: 1px solid #ddd;
 }
 
-th {
-    background-color: #f4f4f4;
+#platforms-table th {
+    background-color: #4CAF50;
+    color: white;
 }
 
-/* Styling for checkboxes */
+#platforms-table td input {
+    margin-top: 5px;
+}
+
 .user-cell {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column; /* Stack checkbox and label vertically */
+    position: relative;
 }
 
 input[type="checkbox"] {
-    margin: 5px;
+    margin-top: 5px;
 }
 
-/* Disabled checkboxes (already selected choices) */
-input[type="checkbox"]:disabled {
-    background-color: #f2f2f2;
-    cursor: not-allowed;
+.green-bg {
+    background-color: #4CAF50;
+    color: white;
 }
 
-/* Green background for the last unchosen option for the user who hasn't made a choice */
-input[type="checkbox"]:last-child:checked {
-    background-color: #90EE90; /* Light green */
+input:disabled {
+    background-color: #e0e0e0;
 }
 
-/* Add some spacing and styling for the table rows */
-.platform-row {
-    height: 50px;
-}
-
-/* Container for the table body (with scrollable option) */
-#platforms-table-body {
-    max-height: 600px;
-    overflow-y: auto;
-}
-
-/* Styling for the platform rows (from Platform 1 at the bottom to Platform 10 at the top) */
-#platforms-table-body tr {
-    height: 50px;
-}
-
-/* Text styling for headers */
-h1 {
-    text-align: center;
-    font-size: 2em;
-    margin: 20px 0;
+input[type="checkbox"]:checked {
+    background-color: #2196F3;
 }
