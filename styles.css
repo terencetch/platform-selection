@@ -67,3 +67,22 @@ tbody tr:hover {
     background-color: #28a745; /* Green for last remaining choice */
     color: white;
 }
+
+/* New rules for horizontal arrangement of choices */
+.choice-wrapper-container {
+    display: flex;
+    flex-direction: row; /* Ensure horizontal layout */
+    gap: 10px;
+    justify-content: center; /* Center choices */
+}
+
+.choice-wrapper {
+    display: inline-block;
+    text-align: center;
+}
+
+/* Greying out disabled checkboxes */
+input[type="checkbox"]:disabled {
+    background-color: #d3d3d3;
+    cursor: not-allowed;
+}
