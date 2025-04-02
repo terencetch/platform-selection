@@ -1,4 +1,3 @@
-/* General Body Styling */
 body {
     font-family: Arial, sans-serif;
     text-align: center;
@@ -6,88 +5,52 @@ body {
     padding: 0;
 }
 
-/* Heading Style */
 h1 {
     margin: 20px 0;
 }
 
-/* Table Styling */
 table {
     width: 100%;
     border-collapse: collapse;
 }
 
-/* Table Header Styling */
 th, td {
     padding: 10px;
     text-align: center;
     border: 1px solid black;
 }
 
-/* Styling for checkboxes */
 input[type="checkbox"] {
     width: 20px;
     height: 20px;
     margin-bottom: 5px;
 }
 
-/* Styling for the table header */
 thead {
     background-color: #f2f2f2;
 }
 
-/* Alternate row colors for tbody */
 tbody tr:nth-child(even) {
     background-color: #f9f9f9;
 }
 
-/* Hover effect for rows */
 tbody tr:hover {
     background-color: #e2e2e2;
 }
 
-/* Style for each checkbox container */
 .checkbox-container {
     display: flex;
-    justify-content: space-around;
+    flex-direction: column; /* Choices will now be below the checkbox */
+    justify-content: center;
     align-items: center;
 }
 
-/* Style for checkbox labels (choice numbers below checkboxes) */
-.checkbox-container label {
+.choice-label {
     display: block;
     margin-top: 5px;
 }
 
-/* Styling for last remaining choice (green background) */
 .selected-last {
     background-color: #28a745; /* Green for last remaining choice */
     color: white;
-}
-
-/* Additional style for table rows and layout */
-table {
-    width: 100%;
-    max-width: 1000px; /* Ensures the table doesn't stretch too wide on large screens */
-    margin: 20px auto;
-}
-
-/* Ensure the checkboxes align properly inside each table cell */
-td {
-    vertical-align: top;
-}
-
-/* Make sure the layout is responsive for smaller screens */
-@media (max-width: 600px) {
-    table {
-        width: 100%;
-    }
-    .checkbox-container {
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-    }
-    .checkbox-container label {
-        margin-top: 2px;
-    }
 }
