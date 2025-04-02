@@ -91,13 +91,20 @@ function checkLastChoice(platform) {
     const selectedChoices = Object.keys(selections[platform] || {}).map(choice => parseInt(choice));
     const remainingChoices = choices.filter(choice => !selectedChoices.includes(choice));
 
-    // If only one choice is left, color it green
-    document.querySelectorAll(`input[data-platform='${platform}']`).forEach(checkbox => {
-        if (remainingChoices.length === 1 && parseInt(checkbox.dataset.choice) === remainingChoices[0]) {
-            checkbox.parentElement.classList.add("selected-last");
-        } else {
-            checkbox.parentElement.classList.remove("selected-last");
-        }
+    // If only one choice is left for a user who hasn't selected anything, color it green
+    users.forEach(user => {
+        const userSelections = Object.keys(selections[platform] || {}).filter(choice => selections[platform][choice] === user);
+        const remainingChoicesForUser = remainingChoices.filter(choice => !userSelections.includes(choice));
+
+        document.querySelectorAll(`input[data-platform='${platform}'][data-user='${user}']`).forEach(checkbox => {
+            const isLastChoice = remainingChoicesForUser.length === 1 && parseInt(checkbox.dataset.choice) === remainingChoicesForUser[0];
+
+            if (isLastChoice) {
+                checkbox.parentElement.classList.add("selected-last");
+            } else {
+                checkbox.parentElement.classList.remove("selected-last");
+            }
+        });
     });
 }
 
