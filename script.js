@@ -1,54 +1,57 @@
 const users = ["Beleth", "P0NY", "UnsungHero", "AhoyCaptain"];
 const platforms = 10;
-const selections = {};
+const selections = {}; 
 
 function createPlatformUI() {
     const container = document.getElementById("platforms");
-
+    
     for (let i = 1; i <= platforms; i++) {
         const div = document.createElement("div");
         div.classList.add("platform");
         div.innerHTML = `<h3>Platform ${i}</h3>`;
         
-        users.forEach(user => {
-            let select = document.createElement("select");
-            select.dataset.platform = i;
-            select.dataset.user = user;
-
-            for (let n = 1; n <= 4; n++) {
-                let option = document.createElement("option");
-                option.value = n;
-                option.textContent = n;
-                select.appendChild(option);
-            }
-
-            select.addEventListener("change", updateSelections);
-            div.appendChild(document.createTextNode(`${user}: `));
-            div.appendChild(select);
-            div.appendChild(document.createElement("br"));
-        });
-
+        for (let n = 1; n <= 4; n++) {
+            let label = document.createElement("label");
+            let checkbox = document.createElement("input");
+            checkbox.type = "checkbox";
+            checkbox.dataset.platform = i;
+            checkbox.dataset.number = n;
+            checkbox.addEventListener("change", updateSelections);
+            
+            label.appendChild(checkbox);
+            label.appendChild(document.createTextNode(` ${n} `));
+            div.appendChild(label);
+        }
         container.appendChild(div);
     }
 }
 
 function updateSelections(event) {
-    let { platform, user } = event.target.dataset;
-    let value = event.target.value;
+    let checkbox = event.target;
+    let platform = checkbox.dataset.platform;
+    let number = checkbox.dataset.number;
+    
+    if (checkbox.checked) {
+        selections[platform] = selections[platform] || {};
+        selections[platform][number] = true;
+        disableOtherSelections(platform, number);
+    } else {
+        delete selections[platform][number];
+        enableSelections(platform);
+    }
+}
 
-    selections[platform] = selections[platform] || {};
-    selections[platform][user] = value;
-
-    // Restrict other users
-    users.forEach(otherUser => {
-        if (otherUser !== user) {
-            let selects = document.querySelectorAll(`select[data-platform='${platform}'][data-user='${otherUser}']`);
-            selects.forEach(sel => {
-                [...sel.options].forEach(opt => {
-                    opt.disabled = Object.values(selections[platform]).includes(opt.value);
-                });
-            });
+function disableOtherSelections(platform, selectedNumber) {
+    document.querySelectorAll(`input[data-platform='${platform}']`).forEach(checkbox => {
+        if (checkbox.dataset.number !== selectedNumber) {
+            checkbox.disabled = selections[platform][checkbox.dataset.number] ? true : Object.keys(selections[platform]).length >= 4;
         }
+    });
+}
+
+function enableSelections(platform) {
+    document.querySelectorAll(`input[data-platform='${platform}']`).forEach(checkbox => {
+        checkbox.disabled = false;
     });
 }
 
