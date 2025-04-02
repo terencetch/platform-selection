@@ -1,33 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Platform Selection</title>
-    <link rel="stylesheet" href="styles.css"> <!-- Link to your CSS file -->
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js"></script>
+    <link rel="stylesheet" href="styles.css">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-analytics.js"></script>
 </head>
+
 <body>
-    <h1>Platform Selection</h1>
-
-    <!-- Table to display platforms and user selections -->
-    <table>
-        <thead>
-            <tr>
-                <th>Platform</th>
-                <th>Beleth</th>
-                <th>P0NY</th>
-                <th>UnsungHero</th>
-                <th>AhoyCaptain</th>
-            </tr>
-        </thead>
-        <tbody id="platforms-table-body">
-            <!-- Rows for platforms will be dynamically inserted here -->
-        </tbody>
-    </table>
-
-    <!-- Link to your script.js file -->
+    <div class="container">
+        <h1>Platform Selection</h1>
+        <table id="platforms-table">
+            <thead>
+                <tr>
+                    <th>Platform</th>
+                    <th>Beleth</th>
+                    <th>P0NY</th>
+                    <th>UnsungHero</th>
+                    <th>AhoyCaptain</th>
+                </tr>
+            </thead>
+            <tbody id="platforms-table-body">
+                <!-- Platform rows will be inserted here dynamically -->
+            </tbody>
+        </table>
+    </div>
     <script src="script.js"></script>
 </body>
+
 </html>
