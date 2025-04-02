@@ -11,9 +11,12 @@ const firebaseConfig = {
 };
 
 // Initialize Firebase
-firebase.initializeApp(firebaseConfig);
-const database = firebase.database();
-const platformsRef = database.ref("platforms");
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js';
+import { getDatabase, ref, onValue, set } from 'https://www.gstatic.com/firebasejs/9.17.1/firebase-database.js';
+
+const app = initializeApp(firebaseConfig);  // Initialize Firebase app with the config from index.html
+const database = getDatabase(app);  // Get the database reference
+const platformsRef = ref(database, 'platforms');  // Reference to 'platforms' node in the database
 
 // Function to create the platform table UI
 function createPlatformUI(platformData) {
@@ -170,5 +173,4 @@ platformsRef.on('value', snapshot => {
         createPlatformUI(platformData);
     }
 });
-    }
-});
+
