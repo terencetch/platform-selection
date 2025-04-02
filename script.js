@@ -12,7 +12,7 @@ const firebaseConfig = {
 
 // Initialize Firebase
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js';
-import { getDatabase, ref, set, get } from 'https://www.gstatic.com/firebasejs/9.17.1/firebase-database.js';
+import { getDatabase, ref, onValue, set } from 'https://www.gstatic.com/firebasejs/9.17.1/firebase-database.js';
 
 const app = initializeApp(firebaseConfig);  // Initialize Firebase app with the config from index.html
 const database = getDatabase(app);  // Get the database reference
@@ -39,10 +39,7 @@ function createPlatformUI(platformData) {
             userCell.dataset.user = user;
             userCell.dataset.platform = i;
 
-            // Always start with no choices selected on page load
-            const userChoice = null; 
-
-            // Create checkboxes for choices (1 to 4)
+            // Create checkboxes for choices (1 to 4) horizontally
             for (let choice = 1; choice <= 4; choice++) {
                 const choiceWrapper = document.createElement('div');
                 choiceWrapper.classList.add('choice-wrapper');
@@ -53,7 +50,7 @@ function createPlatformUI(platformData) {
                 checkbox.dataset.platform = i;
                 checkbox.dataset.user = user;
 
-                // Explicitly uncheck all checkboxes on page load
+                // Always leave the checkboxes unchecked on page load
                 checkbox.checked = false;
 
                 const label = document.createElement('div');
@@ -74,6 +71,14 @@ function createPlatformUI(platformData) {
     updateUIState();
 }
 
+// Fetch platform data from Firebase and update UI
+onValue(platformsRef, (snapshot) => {
+    const platformData = snapshot.val();
+    if (platformData) {
+        createPlatformUI(platformData); // Render UI based on Firebase data
+    }
+});
+
 // Handle checkbox selection
 document.getElementById('platforms').addEventListener('change', (event) => {
     if (event.target.type === 'checkbox') {
@@ -85,11 +90,9 @@ document.getElementById('platforms').addEventListener('change', (event) => {
         const userRef = ref(database, `platforms/${platformNumber}/${user}`);
 
         if (checkbox.checked) {
-            // If checked, set the choice in Firebase
-            set(userRef, choice);
+            set(userRef, choice); // Save the selected choice to Firebase
         } else {
-            // If unchecked, set it to null in Firebase (i.e., no selection)
-            set(userRef, null);
+            set(userRef, null); // If unchecked, remove the choice from Firebase
         }
     }
 });
@@ -108,11 +111,28 @@ function updateUIState() {
             }
         });
 
+        // Disable other choices for the current user when one is selected
         checkboxes.forEach(checkbox => {
             if (selectedChoice && checkbox.value !== selectedChoice) {
                 checkbox.disabled = true;
             } else {
                 checkbox.disabled = false;
+            }
+        });
+
+        // Disable selected choices for other users
+        const allChoices = [];
+        document.querySelectorAll('.choice-container[data-platform="' + platform + '"]').forEach(cell => {
+            cell.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                if (cb.checked) {
+                    allChoices.push(cb.value);
+                }
+            });
+        });
+
+        checkboxes.forEach(checkbox => {
+            if (allChoices.includes(checkbox.value)) {
+                checkbox.disabled = true;
             }
         });
 
@@ -127,39 +147,3 @@ function updateUIState() {
         }
     });
 }
-
-// Function to disable other choices for the user when one is selected
-function disableOtherChoicesForUser(platform, user, selectedChoice) {
-    const userCell = document.querySelector(`td[data-platform="${platform}"][data-user="${user}"]`);
-    if (!userCell) return;
-
-    const checkboxes = userCell.querySelectorAll('input[type="checkbox"]');
-    checkboxes.forEach(checkbox => {
-        if (checkbox.value !== selectedChoice) {
-            checkbox.disabled = true;
-        }
-    });
-}
-
-// Function to enable all choices when the user unchecks their selection
-function enableChoicesForUser(platform, user) {
-    const userCell = document.querySelector(`td[data-platform="${platform}"][data-user="${user}"]`);
-    if (!userCell) return;
-
-    const checkboxes = userCell.querySelectorAll('input[type="checkbox"]');
-    checkboxes.forEach(checkbox => {
-        checkbox.disabled = false;
-    });
-}
-
-// Fetch platform data from Firebase and update UI
-get(platformsRef)
-    .then(snapshot => {
-        const platformData = snapshot.val();
-        if (platformData) {
-            createPlatformUI(platformData);
-        }
-    })
-    .catch(error => {
-        console.error("Error fetching data from Firebase:", error);
-    });
