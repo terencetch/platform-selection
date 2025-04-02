@@ -1,4 +1,4 @@
-// Firebase config (copy the values directly from index.html)
+// Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyCsuTYdBcFTGRYja0ONqRaW_es2eSCIeKA",
   authDomain: "platform-selection.firebaseapp.com",
@@ -54,7 +54,7 @@ function createPlatformUI(platformData) {
                 checkbox.dataset.user = user;
 
                 // Initially unchecked on page load
-                checkbox.checked = platformData && platformData[i] && platformData[i][user] === choice;
+                checkbox.checked = false;
 
                 const label = document.createElement('div');
                 label.classList.add('choice-label');
@@ -104,6 +104,7 @@ document.getElementById('platforms').addEventListener('change', (event) => {
 
 // Function to update UI state (disabling checkboxes and setting green background)
 function updateUIState() {
+    // Apply logic for each platform independently
     document.querySelectorAll('.choice-container').forEach(userCell => {
         const platform = userCell.dataset.platform;
         const user = userCell.dataset.user;
