@@ -53,8 +53,12 @@ function createPlatformUI(platformData) {
                 checkbox.dataset.platform = i;
                 checkbox.dataset.user = user;
 
-                // Always leave the checkboxes unchecked on page load
-                checkbox.checked = false;
+                // Set initial checkbox state based on Firebase data
+                if (platformData && platformData[i] && platformData[i][user] == choice) {
+                    checkbox.checked = true;
+                } else {
+                    checkbox.checked = false;
+                }
 
                 const label = document.createElement('div');
                 label.classList.add('choice-label');
