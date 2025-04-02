@@ -14,14 +14,17 @@ function createPlatformUI(platformData) {
     // Clear existing rows before rendering new data
     tableBody.innerHTML = '';
 
+    // Reverse the platformData so Platform 10 appears at the top and Platform 1 at the bottom
+    platformData.reverse(); 
+
     // Loop through each platform and create a row in the table
-    for (let platformId = 1; platformId <= 10; platformId++) {
-        const platform = platformData[platformId - 1];
+    for (let platformId = 0; platformId < platformData.length; platformId++) {
+        const platform = platformData[platformId];
         const row = document.createElement('tr');
 
         // Platform number column
         const platformCell = document.createElement('td');
-        platformCell.textContent = `Platform ${platformId}`;
+        platformCell.textContent = `Platform ${10 - platformId}`;  // Display Platform 10 at the top
         row.appendChild(platformCell);
 
         // Create cells for each user (Beleth, P0NY, UnsungHero, AhoyCaptain)
@@ -29,7 +32,7 @@ function createPlatformUI(platformData) {
             const userCell = document.createElement('td');
             const checkboxContainer = document.createElement('div');
             checkboxContainer.classList.add('checkbox-container');
-            
+
             // Create checkboxes for 1, 2, 3, 4 choices
             for (let choice = 1; choice <= 4; choice++) {
                 const checkbox = document.createElement('input');
@@ -75,7 +78,7 @@ function handleChoiceSelection(user, platformId, choice, platform) {
 
 // Disable other choices for a user in the selected platform
 function disableOtherChoicesForUser(platformId, userIndex, choice, platform) {
-    const userCells = document.querySelectorAll(`#platforms tr:nth-child(${platformId}) td`);
+    const userCells = document.querySelectorAll(`#platforms tr:nth-child(${platformId + 1}) td`);
     const userCell = userCells[userIndex];
 
     userCell.querySelectorAll('input[type="checkbox"]').forEach(input => {
@@ -89,7 +92,7 @@ function disableOtherChoicesForUser(platformId, userIndex, choice, platform) {
 
 // Disable other users from selecting the same choice in the platform
 function disableOtherUsers(platformId, choice, userIndex) {
-    const rows = document.querySelectorAll(`#platforms tr:nth-child(${platformId}) td`);
+    const rows = document.querySelectorAll(`#platforms tr:nth-child(${platformId + 1}) td`);
     rows.forEach((cell, idx) => {
         if (idx !== userIndex) {
             const checkboxes = cell.querySelectorAll('input[type="checkbox"]');
@@ -104,7 +107,7 @@ function disableOtherUsers(platformId, choice, userIndex) {
 
 // Check if the last choice should be green (indicating the last available choice for the platform)
 function checkLastChoice(platformId) {
-    const platformRow = document.querySelector(`#platforms tr:nth-child(${platformId})`);
+    const platformRow = document.querySelector(`#platforms tr:nth-child(${platformId + 1})`);
     const checkboxes = platformRow.querySelectorAll('input[type="checkbox"]');
 
     let selectedChoices = [];
