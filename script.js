@@ -21,25 +21,20 @@ const platformsRef = ref(database, 'platforms');
 // Function to create the platform table UI
 function createPlatformUI() {
   const platformTableBody = document.getElementById('platforms');
-  platformTableBody.innerHTML = ''; // Clear existing table content
+  platformTableBody.innerHTML = '';
 
-  // Iterate over platforms from 10 to 1 (reverse order)
   for (let i = 10; i >= 1; i--) {
     const row = document.createElement('tr');
-
-    // Platform number cell
     const platformCell = document.createElement('td');
     platformCell.textContent = `Platform ${i}`;
     row.appendChild(platformCell);
 
-    // Iterate through users
     ['Beleth', 'P0NY', 'UnsungHero', 'AhoyCaptain'].forEach(user => {
       const userCell = document.createElement('td');
       userCell.classList.add('choice-container');
       userCell.dataset.user = user;
       userCell.dataset.platform = i;
 
-      // Create checkboxes for choices (1 to 4) horizontally
       const choiceWrapperContainer = document.createElement('div');
       choiceWrapperContainer.classList.add('choice-wrapper-container');
 
@@ -52,8 +47,6 @@ function createPlatformUI() {
         checkbox.value = choice;
         checkbox.dataset.platform = i;
         checkbox.dataset.user = user;
-
-        // Initially unchecked on page load
         checkbox.checked = false;
 
         const label = document.createElement('div');
@@ -64,18 +57,21 @@ function createPlatformUI() {
         choiceWrapper.appendChild(label);
         choiceWrapperContainer.appendChild(choiceWrapper);
       }
-
       userCell.appendChild(choiceWrapperContainer);
       row.appendChild(userCell);
     });
-
     platformTableBody.appendChild(row);
   }
 }
 
+// Function to clear Firebase data
+function clearFirebaseData() {
+  set(platformsRef, null);
+}
+
 // Listen for platform data in real-time and update UI accordingly
 onValue(platformsRef, (snapshot) => {
-  const platformData = snapshot.val() || {}; // Handle null snapshot
+  const platformData = snapshot.val() || {};
   updateUIState(platformData);
 });
 
@@ -88,8 +84,6 @@ document.getElementById('platforms').addEventListener('change', (event) => {
     const choice = checkbox.value;
 
     const userRef = ref(database, `platforms/${platformNumber}/${user}`);
-
-    // Update Firebase based on checkbox state
     set(userRef, checkbox.checked ? choice : null);
   }
 });
@@ -108,13 +102,11 @@ function updateUIState(platformData) {
       }
     });
 
-    // Disable other choices for the current user when one is selected
     checkboxes.forEach(checkbox => {
       checkbox.disabled = selectedChoice && checkbox.value !== selectedChoice;
     });
 
-    // Disable selected choices for other users on the same platform
-    const platformUsersData = platformData[platform] || {}; // Handle undefined
+    const platformUsersData = platformData[platform] || {};
     Object.entries(platformUsersData).forEach(([otherUser, otherChoice]) => {
       if (otherUser !== user && otherChoice) {
         checkboxes.forEach(checkbox => {
@@ -125,17 +117,17 @@ function updateUIState(platformData) {
       }
     });
 
-    // Green background for the last remaining choice (last user who selects)
     const uncheckedChoices = Array.from(checkboxes).filter(checkbox => !checkbox.checked && !checkbox.disabled);
     if (uncheckedChoices.length === 1) {
       uncheckedChoices[0].parentElement.style.backgroundColor = 'green';
     } else {
       checkboxes.forEach(checkbox => {
-        checkbox.parentElement.style.backgroundColor = ''; // Reset background
+        checkbox.parentElement.style.backgroundColor = '';
       });
     }
   });
 }
 
-//Initial page load, ignore firebase data.
+// Clear Firebase data and create initial UI
+clearFirebaseData();
 createPlatformUI();
