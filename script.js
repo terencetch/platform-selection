@@ -127,7 +127,7 @@ function updateUIState() {
             }
         });
 
-        // Disable selected choices for other users
+        // Disable selected choices for other users (ONLY for the same platform)
         const allChoices = [];
         document.querySelectorAll('.choice-container').forEach(otherUserCell => {
             if (otherUserCell !== userCell && otherUserCell.dataset.platform === platform) {
