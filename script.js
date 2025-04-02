@@ -57,10 +57,11 @@ function createPlatformUI(platformData) {
                 checkbox.dataset.platform = i;
                 checkbox.dataset.user = user;
 
+                // Make sure checkboxes are unchecked if no choice is made
                 if (userChoice == choice) {
                     checkbox.checked = true;
                 } else {
-                    checkbox.checked = false; // Make sure it is unchecked initially
+                    checkbox.checked = false; // Uncheck by default
                 }
 
                 const label = document.createElement('div');
@@ -100,13 +101,37 @@ document.getElementById('platforms').addEventListener('change', (event) => {
 
         const userRef = ref(database, `platforms/${platformNumber}/${user}`);
 
+        // If the checkbox is checked, store the selected choice
         if (checkbox.checked) {
-            set(userRef, choice);  // Save the selected choice
+            set(userRef, choice);
         } else {
-            set(userRef, null);  // Remove the selected choice
+            // If the checkbox is unchecked, store null to indicate no selection
+            set(userRef, null);
         }
+
+        // After updating Firebase, ensure that no platform entry is deleted if all are unchecked
+        ensurePlatformExists(platformNumber);
     }
 });
+
+// Function to ensure platform exists in the Firebase database even if all choices are null
+function ensurePlatformExists(platformNumber) {
+    const platformRef = ref(database, `platforms/${platformNumber}`);
+    
+    // Fetch current platform data
+    onValue(platformRef, (snapshot) => {
+        const platformData = snapshot.val();
+
+        // If the platform data is empty, we re-set the platform with empty user data
+        if (platformData) {
+            let hasUserChoices = Object.values(platformData).some(userData => userData !== null);
+            
+            if (!hasUserChoices) {
+                set(platformRef, { Beleth: null, P0NY: null, UnsungHero: null, AhoyCaptain: null });
+            }
+        }
+    });
+}
 
 // Function to update UI state (disabling checkboxes and setting green background)
 function updateUIState() {
