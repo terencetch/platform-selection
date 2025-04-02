@@ -1,4 +1,16 @@
 // Initialize Firebase
+const firebaseConfig = {
+  apiKey: "AIzaSyCsuTYdBcFTGRYja0ONqRaW_es2eSCIeKA",
+  authDomain: "platform-selection.firebaseapp.com",
+  databaseURL: "https://platform-selection-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "platform-selection",
+  storageBucket: "platform-selection.firebasestorage.app",
+  messagingSenderId: "937466148910",
+  appId: "1:937466148910:web:42406630f4d64409e947bf",
+  measurementId: "G-LP3VWKX2F7"
+};
+
+// Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 const database = firebase.database();
 const platformsRef = database.ref("platforms");
