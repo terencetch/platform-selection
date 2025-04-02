@@ -12,7 +12,7 @@ const firebaseConfig = {
 
 // Initialize Firebase
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js';
-import { getDatabase, ref, onValue, set } from 'https://www.gstatic.com/firebasejs/9.17.1/firebase-database.js';
+import { getDatabase, ref, get, set } from 'https://www.gstatic.com/firebasejs/9.17.1/firebase-database.js';
 
 const app = initializeApp(firebaseConfig);  // Initialize Firebase app with the config from index.html
 const database = getDatabase(app);  // Get the database reference
@@ -78,12 +78,16 @@ function createPlatformUI(platformData) {
 }
 
 // Fetch platform data from Firebase and update UI
-platformsRef.on('value', (snapshot) => {
-    const platformData = snapshot.val();
-    if (platformData) {
-        createPlatformUI(platformData);
-    }
-});
+get(platformsRef)
+    .then(snapshot => {
+        const platformData = snapshot.val();
+        if (platformData) {
+            createPlatformUI(platformData);
+        }
+    })
+    .catch(error => {
+        console.error("Error fetching data from Firebase:", error);
+    });
 
 // Handle checkbox selection
 document.getElementById('platforms').addEventListener('change', (event) => {
