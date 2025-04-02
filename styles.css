@@ -40,12 +40,12 @@ tbody tr:hover {
 
 .choice-container {
     display: flex;
-    flex-direction: column;
+    justify-content: space-around;
     align-items: center;
 }
 
 .choice-label {
-    display: inline-block;
+    display: block;
     margin-top: 5px;
 }
 
