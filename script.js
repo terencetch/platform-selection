@@ -83,7 +83,7 @@ function createPlatformUI(platformData) {
 }
 
 // Fetch platform data from Firebase and update UI
-platformsRef.on('value', (snapshot) => {
+onValue(platformsRef, (snapshot) => {
     const platformData = snapshot.val();
     if (platformData) {
         createPlatformUI(platformData);
@@ -98,12 +98,12 @@ document.getElementById('platforms').addEventListener('change', (event) => {
         const user = checkbox.dataset.user;
         const choice = checkbox.value;
 
-        const userRef = platformsRef.child(platformNumber).child(user);
+        const userRef = ref(database, `platforms/${platformNumber}/${user}`);
 
         if (checkbox.checked) {
-            userRef.set(choice);  // Save the selected choice
+            set(userRef, choice);  // Save the selected choice
         } else {
-            userRef.set(null);  // Remove the selected choice
+            set(userRef, null);  // Remove the selected choice
         }
     }
 });
@@ -165,12 +165,3 @@ function enableChoicesForUser(platform, user) {
         checkbox.disabled = false;
     });
 }
-
-// Listen for database updates and refresh UI
-platformsRef.on('value', snapshot => {
-    const platformData = snapshot.val();
-    if (platformData) {
-        createPlatformUI(platformData);
-    }
-});
-
