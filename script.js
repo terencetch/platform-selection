@@ -14,10 +14,8 @@ const firebaseConfig = {
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js';
 import { getDatabase, ref, onValue, set } from 'https://www.gstatic.com/firebasejs/9.17.1/firebase-database.js';
 
-// Your Firebase config (it's already defined in index.html, so no need to redefine it here)
 const app = initializeApp(firebaseConfig);  // Initialize Firebase app with the config from index.html
 const database = getDatabase(app);  // Get the database reference
-
 const platformsRef = ref(database, 'platforms');
 
 // Function to create the platform table UI
@@ -58,6 +56,8 @@ function createPlatformUI(platformData) {
 
                 if (userChoice == choice) {
                     checkbox.checked = true;
+                } else {
+                    checkbox.checked = false; // Ensure the box is unchecked initially
                 }
 
                 const label = document.createElement('div');
@@ -79,7 +79,7 @@ function createPlatformUI(platformData) {
 }
 
 // Fetch platform data from Firebase and update UI
-onValue(platformsRef, (snapshot) => {
+platformsRef.on('value', (snapshot) => {
     const platformData = snapshot.val();
     if (platformData) {
         createPlatformUI(platformData);
@@ -94,12 +94,12 @@ document.getElementById('platforms').addEventListener('change', (event) => {
         const user = checkbox.dataset.user;
         const choice = checkbox.value;
 
-        const userRef = ref(database, 'platforms/' + platformNumber + '/' + user);
+        const userRef = platformsRef.child(platformNumber).child(user);
 
         if (checkbox.checked) {
-            set(userRef, choice);
+            userRef.set(choice);
         } else {
-            set(userRef, null);
+            userRef.set(null);  // Uncheck and update the database to null
         }
     }
 });
@@ -163,7 +163,7 @@ function enableChoicesForUser(platform, user) {
 }
 
 // Listen for database updates and refresh UI
-onValue(platformsRef, snapshot => {
+platformsRef.on('value', snapshot => {
     const platformData = snapshot.val();
     if (platformData) {
         createPlatformUI(platformData);
