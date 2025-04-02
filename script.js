@@ -16,7 +16,7 @@ function createPlatformUI(platformData) {
 
     // Convert the platformData object to an array and reverse it
     const platformArray = Object.values(platformData); // Convert to an array
-    platformArray.reverse(); // Now we can reverse the array
+    platformArray.reverse(); // Reverse the platform array to display Platform 10 at the top
 
     // Loop through each platform and create a row in the table
     for (let platformId = 0; platformId < platformArray.length; platformId++) {
@@ -29,7 +29,7 @@ function createPlatformUI(platformData) {
         row.appendChild(platformCell);
 
         // Create cells for each user (Beleth, P0NY, UnsungHero, AhoyCaptain)
-        ['Beleth', 'P0NY', 'UnsungHero', 'AhoyCaptain'].forEach(user => {
+        ['Beleth', 'P0NY', 'UnsungHero', 'AhoyCaptain'].forEach((user, userIndex) => {
             const userCell = document.createElement('td');
             const checkboxContainer = document.createElement('div');
             checkboxContainer.classList.add('checkbox-container');
@@ -51,8 +51,14 @@ function createPlatformUI(platformData) {
 
                 // Event listener for checkbox selection
                 checkbox.addEventListener('change', () => {
-                    handleChoiceSelection(user, platformId, choice, platform);
+                    handleChoiceSelection(user, platformId, choice, platform, userIndex);
                 });
+
+                // If the user has selected this option previously, check the box
+                if (platform[user][choice]) {
+                    checkbox.checked = true;
+                    disableOtherChoicesForUser(platformId, userIndex, choice, platform);
+                }
             }
 
             userCell.appendChild(checkboxContainer);
@@ -64,9 +70,10 @@ function createPlatformUI(platformData) {
 }
 
 // Function to handle choice selection for each user
-function handleChoiceSelection(user, platformId, choice, platform) {
-    const userIndex = ['Beleth', 'P0NY', 'UnsungHero', 'AhoyCaptain'].indexOf(user);
-
+function handleChoiceSelection(user, platformId, choice, platform, userIndex) {
+    // Update Firebase with the new choice
+    set(ref(database, `platforms/${platformId}/${user}/${choice}`), true);
+    
     // Disable other choices for this user in the selected platform
     disableOtherChoicesForUser(platformId, userIndex, choice, platform);
 
