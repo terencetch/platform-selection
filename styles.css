@@ -45,9 +45,22 @@ tbody tr:hover {
     align-items: center;
 }
 
+.choice-wrapper {
+    display: flex;
+    flex-direction: column; /* Vertically align the checkbox and label */
+    align-items: center;
+    margin-right: 10px; /* Space between each choice */
+}
+
 .choice-label {
     display: block;
     margin-top: 5px;
+}
+
+.choices-wrapper {
+    display: flex; /* Align choices horizontally */
+    justify-content: space-around;
+    width: 100%;
 }
 
 .selected-last {
