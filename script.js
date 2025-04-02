@@ -72,7 +72,7 @@ function createPlatformUI(platformData) {
         platformTableBody.appendChild(row);
     }
 
-    updateUIState();
+    updateUIState();  // Call the updateUIState function to apply any state changes
 }
 
 // Fetch platform data from Firebase and update UI
@@ -105,6 +105,7 @@ document.getElementById('platforms').addEventListener('change', (event) => {
 
 // Function to update UI state (disabling checkboxes and setting green background)
 function updateUIState() {
+    // Update each platform row individually
     document.querySelectorAll('.choice-container').forEach(userCell => {
         const platform = userCell.dataset.platform;
         const user = userCell.dataset.user;
@@ -144,5 +145,15 @@ function updateUIState() {
                 checkbox.disabled = true;
             }
         });
+
+        // Green background for the last remaining choice (last user who selects)
+        const uncheckedChoices = [...checkboxes].filter(checkbox => !checkbox.checked);
+        if (uncheckedChoices.length === 1) {
+            uncheckedChoices[0].parentElement.style.backgroundColor = 'green';
+        } else {
+            checkboxes.forEach(checkbox => {
+                checkbox.parentElement.style.backgroundColor = '';  // Reset background
+            });
+        }
     });
 }
