@@ -1,62 +1,93 @@
+/* General Body Styling */
 body {
     font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 20px;
-    background-color: #f4f4f9;
-}
-
-h1 {
     text-align: center;
-    margin-bottom: 20px;
+    margin: 0;
+    padding: 0;
 }
 
+/* Heading Style */
+h1 {
+    margin: 20px 0;
+}
+
+/* Table Styling */
 table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 20px;
 }
 
-table, th, td {
-    border: 1px solid #ddd;
-}
-
+/* Table Header Styling */
 th, td {
     padding: 10px;
     text-align: center;
+    border: 1px solid black;
 }
 
-th {
-    background-color: #4CAF50;
-    color: white;
+/* Styling for checkboxes */
+input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    margin-bottom: 5px;
 }
 
+/* Styling for the table header */
+thead {
+    background-color: #f2f2f2;
+}
+
+/* Alternate row colors for tbody */
+tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+/* Hover effect for rows */
+tbody tr:hover {
+    background-color: #e2e2e2;
+}
+
+/* Style for each checkbox container */
 .checkbox-container {
     display: flex;
-    flex-direction: row;
-    justify-content: center;
+    justify-content: space-around;
     align-items: center;
 }
 
-.checkbox-container input[type="checkbox"] {
-    margin: 0 5px;
-}
-
+/* Style for checkbox labels (choice numbers below checkboxes) */
 .checkbox-container label {
-    margin-left: 5px;
+    display: block;
+    margin-top: 5px;
 }
 
-input[type="checkbox"]:checked {
-    background-color: #90EE90;
+/* Styling for last remaining choice (green background) */
+.selected-last {
+    background-color: #28a745; /* Green for last remaining choice */
+    color: white;
 }
 
-input[type="checkbox"]:disabled {
-    background-color: #D3D3D3;
+/* Additional style for table rows and layout */
+table {
+    width: 100%;
+    max-width: 1000px; /* Ensures the table doesn't stretch too wide on large screens */
+    margin: 20px auto;
 }
 
-input[type="checkbox"]:checked + label {
-    color: #90EE90;
+/* Ensure the checkboxes align properly inside each table cell */
+td {
+    vertical-align: top;
 }
 
-input[type="checkbox"]:not(:checked):disabled + label {
-    color: #D3D3D3;
+/* Make sure the layout is responsive for smaller screens */
+@media (max-width: 600px) {
+    table {
+        width: 100%;
+    }
+    .checkbox-container {
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+    .checkbox-container label {
+        margin-top: 2px;
+    }
 }
