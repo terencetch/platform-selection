@@ -1,8 +1,4 @@
 // Initialize Firebase
-const { initializeApp } = firebase;
-const { getDatabase, ref, set, get, child, onValue } = firebase.database;
-
-// Firebase configuration object
 const firebaseConfig = {
   apiKey: "AIzaSyCsuTYdBcFTGRYja0ONqRaW_es2eSCIeKA",
   authDomain: "platform-selection.firebaseapp.com",
@@ -14,19 +10,17 @@ const firebaseConfig = {
   measurementId: "G-LP3VWKX2F7"
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
+// Initialize Firebase app and database
+const app = firebase.initializeApp(firebaseConfig);
+const database = firebase.database(app);
 
-// Get a reference to the Firebase Realtime Database
-const database = getDatabase(app);
-
-// Variables for keeping track of platform data
+// Set up the platform data
 let platformData = {};
 
-// Function to load platform data from Firebase and render the table
+// Load platform data from Firebase and render it
 function loadPlatformData() {
-    const dbRef = ref(database, 'platforms/');
-    onValue(dbRef, (snapshot) => {
+    const dbRef = firebase.database().ref('platforms/');
+    dbRef.on('value', (snapshot) => {
         if (snapshot.exists()) {
             platformData = snapshot.val();
             renderPlatformTable();
@@ -36,51 +30,50 @@ function loadPlatformData() {
     });
 }
 
-// Function to render the platform table based on current data
+// Render the platform selection table
 function renderPlatformTable() {
     const tableBody = document.getElementById('platforms-table-body');
     tableBody.innerHTML = ''; // Clear the table
 
-    for (let i = 10; i >= 1; i--) { // Loop through platforms 10 to 1
+    // Loop through platforms and display them
+    for (let i = 10; i >= 1; i--) {
         const row = document.createElement('tr');
         row.classList.add('platform-row');
+        
         const platformCell = document.createElement('td');
         platformCell.textContent = `Platform ${i}`;
         row.appendChild(platformCell);
 
-        ['Beleth', 'P0NY', 'UnsungHero', 'AhoyCaptain'].forEach(user => {
+        const users = ['Beleth', 'P0NY', 'UnsungHero', 'AhoyCaptain'];
+
+        users.forEach(user => {
             const userCell = document.createElement('td');
             userCell.classList.add('user-cell');
 
-            const choiceContainer = document.createElement('div');
-            const platformChoices = [1, 2, 3, 4];
+            const checkboxContainer = document.createElement('div');
+            const checkboxes = [1, 2, 3, 4];
 
-            platformChoices.forEach(choice => {
+            checkboxes.forEach((choice) => {
                 const checkbox = document.createElement('input');
-                checkbox.type = 'checkbox';
+                checkbox.type = "checkbox";
+                checkbox.name = `${user}-platform-${i}`;
                 checkbox.value = choice;
-                checkbox.disabled = platformData[`platform${i}`]?.[user]; // Disable if the user already made a choice
 
-                // If the user has selected a choice, mark it checked
-                if (platformData[`platform${i}`]?.[user] === choice) {
-                    checkbox.checked = true;
+                // Disable checkboxes that are already selected by others
+                if (platformData[`platform${i}`] && Object.values(platformData[`platform${i}`]).includes(choice) && platformData[`platform${i}`][user] !== choice) {
+                    checkbox.disabled = true;
                 }
 
-                // Handle user selection and unchecking
-                checkbox.addEventListener('change', function() {
-                    handleChoiceChange(i, user, choice, checkbox);
-                });
+                // If it's the last user and no choice is selected, make the last choice green
+                if (user === 'AhoyCaptain' && Object.values(platformData[`platform${i}`]).length === 3 && !checkbox.checked) {
+                    checkbox.style.backgroundColor = 'green';
+                }
 
-                const choiceLabel = document.createElement('span');
-                choiceLabel.textContent = choice;
-
-                // Add choice to container
-                choiceContainer.appendChild(checkbox);
-                choiceContainer.appendChild(choiceLabel);
+                // Add checkbox to the container
+                checkboxContainer.appendChild(checkbox);
             });
 
-            // Add the choice container to the user's cell
-            userCell.appendChild(choiceContainer);
+            userCell.appendChild(checkboxContainer);
             row.appendChild(userCell);
         });
 
@@ -88,26 +81,8 @@ function renderPlatformTable() {
     }
 }
 
-// Function to handle the change of a user's choice
-function handleChoiceChange(platformNumber, user, choice, checkbox) {
-    const platformRef = ref(database, `platforms/platform${platformNumber}`);
-    const updates = {};
+// Initialize and load data on page load
+window.onload = function () {
+    loadPlatformData();
+};
 
-    // If the checkbox is checked, set the choice
-    if (checkbox.checked) {
-        updates[user] = choice;
-    } else {
-        updates[user] = null;
-    }
-
-    // Write the updates to the database
-    set(platformRef, updates);
-}
-
-// Function to initialize the app (called when the page loads)
-function initializeApp() {
-    loadPlatformData(); // Load and display platform data when the page is loaded
-}
-
-// Call the initialization function when the page loads
-document.addEventListener("DOMContentLoaded", initializeApp);
