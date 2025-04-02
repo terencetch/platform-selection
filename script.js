@@ -57,8 +57,20 @@ function updateSelections(event) {
     // If the checkbox is checked, store the selection, and disable others for that platform
     if (checkbox.checked) {
         selections[platform] = selections[platform] || {};
-        selections[platform][choice] = user;
 
+        // Uncheck the previously selected choice for this user (if any)
+        if (selections[platform][user]) {
+            const prevChoice = selections[platform][user];
+            const prevCheckbox = document.querySelector(`input[data-platform='${platform}'][data-user='${user}'][data-choice='${prevChoice}']`);
+            if (prevCheckbox) {
+                prevCheckbox.checked = false; // Uncheck the previous selection
+            }
+        }
+
+        selections[platform][choice] = user; // Store new selection
+
+        // Disable other choices for the user
+        disableOtherChoicesForUser(platform, user, choice);
         // Disable other users from selecting this choice
         disableOtherUsers(platform, choice, user);
         checkLastChoice(platform);
@@ -66,8 +78,23 @@ function updateSelections(event) {
         // If unchecked, remove the selection and re-enable the choices
         delete selections[platform][choice];
         enableOtherUsers(platform, choice);
+        enableOtherChoicesForUser(platform, user);
         checkLastChoice(platform);
     }
+}
+
+function disableOtherChoicesForUser(platform, user, selectedChoice) {
+    document.querySelectorAll(`input[data-platform='${platform}'][data-user='${user}']`).forEach(checkbox => {
+        if (checkbox.dataset.choice !== selectedChoice) {
+            checkbox.disabled = true; // Disable other choices for this user
+        }
+    });
+}
+
+function enableOtherChoicesForUser(platform, user) {
+    document.querySelectorAll(`input[data-platform='${platform}'][data-user='${user}']`).forEach(checkbox => {
+        checkbox.disabled = false; // Re-enable all choices for this user
+    });
 }
 
 function disableOtherUsers(platform, selectedChoice, selectedUser) {
@@ -91,14 +118,17 @@ function checkLastChoice(platform) {
     const selectedChoices = Object.keys(selections[platform] || {}).map(choice => parseInt(choice));
     const remainingChoices = choices.filter(choice => !selectedChoices.includes(choice));
 
-    // If only one choice is left for a user who hasn't selected anything, color it green
-    users.forEach(user => {
-        const userSelections = Object.keys(selections[platform] || {}).filter(choice => selections[platform][choice] === user);
-        const remainingChoicesForUser = remainingChoices.filter(choice => !userSelections.includes(choice));
+    // Identify users who haven't selected a choice for this platform
+    let usersWithNoSelection = users.filter(user => !Object.keys(selections[platform] || {}).some(choice => selections[platform][choice] === user));
+
+    // Only apply green background to the last user who hasn't selected a choice
+    usersWithNoSelection.forEach(user => {
+        const remainingChoicesForUser = remainingChoices.length === 1 ? remainingChoices : [];
 
         document.querySelectorAll(`input[data-platform='${platform}'][data-user='${user}']`).forEach(checkbox => {
             const isLastChoice = remainingChoicesForUser.length === 1 && parseInt(checkbox.dataset.choice) === remainingChoicesForUser[0];
 
+            // Apply green background only for the last user with remaining choices
             if (isLastChoice) {
                 checkbox.parentElement.classList.add("selected-last");
             } else {
