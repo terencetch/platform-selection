@@ -1,3 +1,15 @@
+// Firebase config (copy the values directly from index.html)
+const firebaseConfig = {
+  apiKey: "AIzaSyCsuTYdBcFTGRYja0ONqRaW_es2eSCIeKA",
+  authDomain: "platform-selection.firebaseapp.com",
+  databaseURL: "https://platform-selection-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "platform-selection",
+  storageBucket: "platform-selection.firebasestorage.app",
+  messagingSenderId: "937466148910",
+  appId: "1:937466148910:web:42406630f4d64409e947bf",
+  measurementId: "G-LP3VWKX2F7"
+};
+
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 const database = firebase.database();
@@ -28,7 +40,10 @@ function createPlatformUI(platformData) {
 
             let userChoice = platformData[i][user] || null;
 
-            // Create checkboxes for choices (1 to 4)
+            // Create checkboxes for choices (1 to 4) horizontally
+            const choicesWrapper = document.createElement('div');
+            choicesWrapper.classList.add('choices-wrapper');
+
             for (let choice = 1; choice <= 4; choice++) {
                 const choiceWrapper = document.createElement('div');
                 choiceWrapper.classList.add('choice-wrapper');
@@ -51,9 +66,10 @@ function createPlatformUI(platformData) {
 
                 choiceWrapper.appendChild(checkbox);
                 choiceWrapper.appendChild(label);
-                userCell.appendChild(choiceWrapper);
+                choicesWrapper.appendChild(choiceWrapper);
             }
 
+            userCell.appendChild(choicesWrapper);
             row.appendChild(userCell);
         });
 
@@ -152,5 +168,7 @@ platformsRef.on('value', snapshot => {
     const platformData = snapshot.val();
     if (platformData) {
         createPlatformUI(platformData);
+    }
+});
     }
 });
