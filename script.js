@@ -53,7 +53,7 @@ function createPlatformUI(platformData) {
                 checkbox.dataset.platform = i;
                 checkbox.dataset.user = user;
 
-                // Always leave the checkboxes unchecked on page load
+                // Initially unchecked on page load
                 checkbox.checked = platformData && platformData[i] && platformData[i][user] === choice;
 
                 const label = document.createElement('div');
@@ -93,6 +93,7 @@ document.getElementById('platforms').addEventListener('change', (event) => {
 
         const userRef = ref(database, `platforms/${platformNumber}/${user}`);
 
+        // Update Firebase based on checkbox state
         if (checkbox.checked) {
             set(userRef, choice); // Save the selected choice to Firebase
         } else {
@@ -105,7 +106,6 @@ document.getElementById('platforms').addEventListener('change', (event) => {
 
 // Function to update UI state (disabling checkboxes and setting green background)
 function updateUIState() {
-    // Update each platform row individually
     document.querySelectorAll('.choice-container').forEach(userCell => {
         const platform = userCell.dataset.platform;
         const user = userCell.dataset.user;
@@ -127,7 +127,7 @@ function updateUIState() {
             }
         });
 
-        // Disable selected choices for other users (this applies to the current platform only)
+        // Disable selected choices for other users on the same platform
         const allChoices = [];
         document.querySelectorAll('.choice-container').forEach(otherUserCell => {
             if (otherUserCell !== userCell && otherUserCell.dataset.platform === platform) {
