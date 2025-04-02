@@ -12,7 +12,7 @@ const firebaseConfig = {
 
 // Initialize Firebase
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js';
-import { getDatabase, ref, get, set } from 'https://www.gstatic.com/firebasejs/9.17.1/firebase-database.js';
+import { getDatabase, ref, set } from 'https://www.gstatic.com/firebasejs/9.17.1/firebase-database.js';
 
 const app = initializeApp(firebaseConfig);  // Initialize Firebase app with the config from index.html
 const database = getDatabase(app);  // Get the database reference
@@ -39,7 +39,8 @@ function createPlatformUI(platformData) {
             userCell.dataset.user = user;
             userCell.dataset.platform = i;
 
-            let userChoice = platformData && platformData[i] && platformData[i][user] ? platformData[i][user] : null;
+            // Always start with no choices selected on page load
+            const userChoice = null; 
 
             // Create checkboxes for choices (1 to 4)
             for (let choice = 1; choice <= 4; choice++) {
@@ -52,12 +53,8 @@ function createPlatformUI(platformData) {
                 checkbox.dataset.platform = i;
                 checkbox.dataset.user = user;
 
-                // Ensure checkboxes are unchecked by default
-                if (userChoice == choice) {
-                    checkbox.checked = true;
-                } else {
-                    checkbox.checked = false; // Explicitly uncheck on page load
-                }
+                // Explicitly uncheck all checkboxes on page load
+                checkbox.checked = false;
 
                 const label = document.createElement('div');
                 label.classList.add('choice-label');
@@ -76,18 +73,6 @@ function createPlatformUI(platformData) {
 
     updateUIState();
 }
-
-// Fetch platform data from Firebase and update UI
-get(platformsRef)
-    .then(snapshot => {
-        const platformData = snapshot.val();
-        if (platformData) {
-            createPlatformUI(platformData);
-        }
-    })
-    .catch(error => {
-        console.error("Error fetching data from Firebase:", error);
-    });
 
 // Handle checkbox selection
 document.getElementById('platforms').addEventListener('change', (event) => {
@@ -166,3 +151,15 @@ function enableChoicesForUser(platform, user) {
         checkbox.disabled = false;
     });
 }
+
+// Fetch platform data from Firebase and update UI
+get(platformsRef)
+    .then(snapshot => {
+        const platformData = snapshot.val();
+        if (platformData) {
+            createPlatformUI(platformData);
+        }
+    })
+    .catch(error => {
+        console.error("Error fetching data from Firebase:", error);
+    });
