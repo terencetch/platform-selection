@@ -120,3 +120,17 @@ function checkLastChoice(platformId) {
 
         // Apply the green background color to the last remaining choice
         checkboxes.forEach(checkbox => {
+            if (checkbox.value === String(lastChoice)) {
+                checkbox.parentElement.classList.add('selected-last');
+            }
+        });
+    }
+}
+
+// Fetch data from Firebase and populate the table
+onValue(platformsRef, (snapshot) => {
+    const platformData = snapshot.val();
+    if (platformData) {
+        createPlatformUI(platformData);
+    }
+});
