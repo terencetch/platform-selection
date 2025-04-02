@@ -19,7 +19,7 @@ const database = getDatabase(app);
 const platformsRef = ref(database, 'platforms');
 
 // Function to create the platform table UI
-function createPlatformUI(platformData) {
+function createPlatformUI() {
   const platformTableBody = document.getElementById('platforms');
   platformTableBody.innerHTML = ''; // Clear existing table content
 
@@ -72,13 +72,14 @@ function createPlatformUI(platformData) {
     platformTableBody.appendChild(row);
   }
 
-  updateUIState(platformData || {}); // Call the updateUIState function to apply any state changes
+  // Initial UI state (all unchecked)
+  updateUIState({});
 }
 
 // Listen for platform data in real-time and update UI accordingly
 onValue(platformsRef, (snapshot) => {
-  const platformData = snapshot.val();
-  createPlatformUI(platformData); // Render UI based on Firebase data
+  const platformData = snapshot.val() || {}; // Handle null snapshot
+  updateUIState(platformData);
 });
 
 // Handle checkbox selection and update Firebase in real-time
@@ -116,18 +117,16 @@ function updateUIState(platformData) {
     });
 
     // Disable selected choices for other users on the same platform
-    const platformUsersData = platformData[platform];
-    if (platformUsersData) {
-      Object.entries(platformUsersData).forEach(([otherUser, otherChoice]) => {
-        if (otherUser !== user && otherChoice) {
-          checkboxes.forEach(checkbox => {
-            if (checkbox.value === otherChoice) {
-              checkbox.disabled = true;
-            }
-          });
-        }
-      });
-    }
+    const platformUsersData = platformData[platform] || {}; // Handle undefined
+    Object.entries(platformUsersData).forEach(([otherUser, otherChoice]) => {
+      if (otherUser !== user && otherChoice) {
+        checkboxes.forEach(checkbox => {
+          if (checkbox.value === otherChoice) {
+            checkbox.disabled = true;
+          }
+        });
+      }
+    });
 
     // Green background for the last remaining choice (last user who selects)
     const uncheckedChoices = Array.from(checkboxes).filter(checkbox => !checkbox.checked && !checkbox.disabled);
@@ -140,3 +139,6 @@ function updateUIState(platformData) {
     }
   });
 }
+
+//Initial page load, ignore firebase data.
+createPlatformUI();
