@@ -99,8 +99,6 @@ document.getElementById('platforms').addEventListener('change', (event) => {
         } else {
             set(userRef, null); // If unchecked, remove the choice from Firebase
         }
-
-        updateUIState(); // Update UI state after the change
     }
 });
 
