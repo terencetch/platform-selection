@@ -4,6 +4,9 @@ import { getDatabase, ref, onValue, set } from 'https://www.gstatic.com/firebase
 // Initialize Firebase (Firebase app is already initialized in index.html)
 const database = getDatabase();
 
+// Define the Firebase Realtime Database reference for platforms
+const platformsRef = ref(getDatabase());
+
 // Disable other choices for the user (add a check to ensure the elements exist)
 function disableOtherChoicesForUser(platform, user, choice) {
     const platformRow = document.querySelector(`#platform-${platform}`);
