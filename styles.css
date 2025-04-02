@@ -23,7 +23,7 @@ th, td {
 input[type="checkbox"] {
     width: 20px;
     height: 20px;
-    margin: 0;
+    margin-bottom: 5px;
 }
 
 thead {
@@ -36,4 +36,14 @@ tbody tr:nth-child(even) {
 
 tbody tr:hover {
     background-color: #e2e2e2;
+}
+
+.choice-label {
+    display: block;
+    margin-top: 5px;
+}
+
+.selected-last {
+    background-color: #28a745; /* Green for last remaining choice */
+    color: white;
 }
