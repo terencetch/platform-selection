@@ -71,9 +71,6 @@ function createPlatformUI() {
 
     platformTableBody.appendChild(row);
   }
-
-  // Initial UI state (all unchecked)
-  updateUIState({});
 }
 
 // Listen for platform data in real-time and update UI accordingly
