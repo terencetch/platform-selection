@@ -1,12 +1,12 @@
 // Initialize Firebase
 const firebaseConfig = {
-  apiKey: "AIzaSyCsuTYdBcFTGRYja0ONqRaW_es2eSCIeKA",
-  authDomain: "platform-selection.firebaseapp.com",
-  databaseURL: "https://platform-selection-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "platform-selection",
-  storageBucket: "platform-selection.firebasestorage.app",
-  messagingSenderId: "937466148910",
-  appId: "1:937466148910:web:42406630f4d64409e947bf"
+    apiKey: "YOUR_API_KEY",  // Replace with your actual API Key
+    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",  // Replace with your project ID
+    databaseURL: "https://YOUR_PROJECT_ID.firebaseio.com",  // Replace with your database URL
+    projectId: "YOUR_PROJECT_ID",  // Replace with your project ID
+    storageBucket: "YOUR_PROJECT_ID.appspot.com",  // Replace with your storage bucket
+    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",  // Replace with your messaging sender ID
+    appId: "YOUR_APP_ID"  // Replace with your app ID
 };
 
 // Initialize Firebase
@@ -81,4 +81,44 @@ function handleChoiceChange(platformNum, user, choice, checked) {
     } else {
         platformRef.remove();
     }
+
+    // Update table logic after a change
+    updateTable(platformNum);
+}
+
+// Disable other choices for the user
+function disableOtherChoicesForUser(platform, user, choice) {
+    const userChoices = Array.from(platform[user]);
+    userChoices.forEach(selectedChoice => {
+        if (selectedChoice !== choice) {
+            const checkbox = document.querySelector(`input[value="${selectedChoice}"][data-user="${user}"]`);
+            if (checkbox) checkbox.disabled = true;
+        }
+    });
+}
+
+// Disable other users from selecting this choice
+function disableOtherUsers(platform, choice, user) {
+    const otherUsers = ["Beleth", "P0NY", "UnsungHero", "AhoyCaptain"].filter(u => u !== user);
+    otherUsers.forEach(otherUser => {
+        const otherChoice = platform[otherUser];
+        if (otherChoice === choice) {
+            const checkbox = document.querySelector(`input[value="${choice}"][data-user="${otherUser}"]`);
+            if (checkbox) checkbox.disabled = true;
+        }
+    });
+}
+
+// Check if there is only one remaining choice for the last user
+function checkLastChoice(platform) {
+    const users = ["Beleth", "P0NY", "UnsungHero", "AhoyCaptain"];
+    users.forEach(user => {
+        const userChoices = Object.values(platform).filter(choice => choice === user).length;
+        if (userChoices === 3) {
+            const remainingChoice = [1, 2, 3, 4].find(choice => !userChoices.includes(choice));
+            if (remainingChoice) {
+                document.querySelector(`input[value="${remainingChoice}"][data-user="${user}"]`).style.backgroundColor = 'green';
+            }
+        }
+    });
 }
