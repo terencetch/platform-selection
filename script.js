@@ -1,4 +1,4 @@
-const users = ["User A", "User B", "User C", "User D"];
+const users = ["Beleth", "P0NY", "UnsungHero", "AhoyCaptain"];
 const platforms = 10;
 const selections = {};
 
