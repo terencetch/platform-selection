@@ -1,6 +1,7 @@
-// Reference to Firebase Database
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
 const database = firebase.database();
-const platformsRef = database.ref('platforms');
+const platformsRef = database.ref("platforms");
 
 // Function to create the platform table UI
 function createPlatformUI(platformData) {
