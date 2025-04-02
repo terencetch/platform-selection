@@ -75,7 +75,7 @@ function createPlatformUI(platformData) {
     updateUIState();  // Call the updateUIState function to apply any state changes
 }
 
-// Fetch platform data from Firebase and update UI
+// Fetch platform data from Firebase and update UI in real-time
 onValue(platformsRef, (snapshot) => {
     const platformData = snapshot.val();
     if (platformData) {
